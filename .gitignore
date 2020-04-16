@@ -1,5 +1,6 @@
-# Exclude object files
+# Exclude temp/object/dep files
 *.o
+*.d
 
 # Exclude final binary
 superdiskindex
