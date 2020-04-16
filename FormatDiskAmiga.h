@@ -37,5 +37,5 @@ public:
 	u32 Weave32(u16 odd, u16 even);
 
 protected:
-	void ParseDirectory(u32 block, char const *prefix);
+	void ParseDirectory(int fd, u32 block, char const *prefix);
 };

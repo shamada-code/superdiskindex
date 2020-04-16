@@ -13,21 +13,25 @@
 #include "FormatDiskIBM.h"
 #include "FormatDiskAmiga.h"
 #include "VirtualDisk.h"
+#include <getopt.h>
 
 void print_help()
 {
-	printf("Syntax: superdiskindex -f <infile.scp> [more options]\n");
+	printf("Syntax: superdiskindex -i <infile.scp> [more options]\n");
 	printf("Options:\n");
-	printf("  -f <filename.scp>    | Input filename (scp file format)\n");
-	printf("  -t <tracknum>        | Only analyze track <tracknum>\n");
-	printf("  -r <revnum>          | Only use revolution <revnum>\n");
-	printf("  -v                   | Increase verbosity (can be applied more than once)\n");
+	printf("  -i,--in <filename.scp>   | Input filename (scp file format)\n");
+	printf("  -o,--out <basename>      | Input filename (scp file format)\n");
+	printf("  -t,--track <tracknum>    | Only analyze track <tracknum>\n");
+	printf("  -r,--rev <revnum>        | Only use revolution <revnum>\n");
+	printf("     --listing             | Generate file listing to file <basename>.lst\n");
+	printf("     --export              | Generate disk image <basename>.{adf,img}\n");
+	printf("  -v                       | Increase verbosity (can be applied more than once)\n");
 	printf("\n");
 }
 
 int main(int argc, char **argv)
 {
-	printf("SuperDiskIndex v0.00\n");
+	printf("SuperDiskIndex v0.01\n");
 	printf("\n");
 
 	// make sure, we're using the right data widths
@@ -37,25 +41,39 @@ int main(int argc, char **argv)
 	static_assert(sizeof(u64)==8);
 
 	// parse cmdline options
+	option longopts[] = {
+		{"in", 1, NULL, 'i' },
+		{"out", 1, NULL, 'o' },
+		{"track", 1, NULL, 't' },
+		{"rev", 1, NULL, 'r' },
+		{"listing", 0, NULL, 'l' },
+		{"export", 0, NULL, 'e' },
+		{"help", 0, NULL, 'h' },
+		{0,0,0,0}
+	};
 	int ret = 0;
 	while (ret>=0) {
-		ret = getopt(argc, argv, "vf:t:r:h?");
+		ret = getopt_long(argc, argv, "i:o:t:r:vleh?", longopts, NULL);
 		if (ret>=0) {
-			if (ret=='f') strcpy(Config.fn, optarg);
+			if (ret=='i') strcpy(Config.fn_in, optarg);
+			if (ret=='o') strcpy(Config.fn_out, optarg);
 			if (ret=='t') Config.track = atoi(optarg);
 			if (ret=='r') Config.revolution = atoi(optarg);
 			if (ret=='v') Config.verbose++;
-			if ((ret=='h')||(ret=='?')) { print_help(); return 0; }
+			if (ret=='l') Config.gen_listing=true;
+			if (ret=='e') Config.gen_export=true;
+			if ((ret=='h')||(ret=='?')) { print_help(); return 1; }
 		}
 	}
 
-	// Create VirtualDisk for results
-	VirtualDisk *VD = new VirtualDisk();
-	VD->SetLayout(90,2,30,512); // until we have a proper detection, assume worst case values
+	// check param compatability
+	if (strlen(Config.fn_in)==0) { printf("No input file specified (-i).\n"); print_help(); return 1; }
+	if ((Config.gen_export||Config.gen_listing)&&(strlen(Config.fn_out)==0)) { printf("Listing and Export modes need output basename defined (-o).\n"); print_help(); return 1; }
+	if ((Config.gen_export||Config.gen_listing)&&(Config.track>=0)) { printf("Listing and Export modes are not working with a limited track selection.\n"); print_help(); return 1; }
 
 	// Initialize FluxData
 	FluxData *flux = new FluxData();
-	flux->Open(Config.fn);
+	flux->Open(Config.fn_in);
 
 	int track_s = flux->GetTrackStart();
 	int track_e = flux->GetTrackEnd();
@@ -71,10 +89,10 @@ int main(int argc, char **argv)
 
 	for (int formatidx=0; formatidx<FormatCount; formatidx++)
 	{
+		VirtualDisk *VD=NULL;
+
 		Format *fmt = Formats[formatidx];
 		if (Config.verbose>=1) printf("##### Checking for '%s' Format \n", fmt->GetName());
-
-		//fmt->SetVirtualDisk(VD);
 
 		for (int pass=0; pass<2; pass++)
 		{

@@ -14,6 +14,9 @@
 #include "MFM.h"
 #include "Helpers.h"
 #include "VirtualDisk.h"
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 ///////////////////////////////////////////////////////////
 
@@ -191,10 +194,33 @@ bool FormatDiskAmiga::Analyze()
 	printf("# ANALYZE: volume label is '%s'.\n", sbuf);
 
 	// Listing
-	printf("# %-60s Type    Size  Blk  UID  GID\n", "Filename");
-	printf("# -----------------------------------------------------------------------------------------\n");
-	ParseDirectory(swap(boot0->rootblock),"/");
+	if (Config.gen_listing)
+	{
+		char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.lst", Config.fn_out);
+		printf("# Generating file listing '%s'.\n",fnbuf);
 
+		int fd = open(fnbuf, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
+		if (fd>=0)
+		{
+			dprintf(fd, "Volume: %s\n", sbuf);
+			dprintf(fd, "\n");
+			dprintf(fd, "%-60s Type    Size  Blk  UID  GID\n", "Filename");
+			dprintf(fd, "-----------------------------------------------------------------------------------------\n");
+			ParseDirectory(fd, swap(boot0->rootblock),"/");
+		}
+		close(fd);
+	}
+
+	// Export
+	if (Config.gen_export)
+	{
+		char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.adf", Config.fn_out);
+		printf("# Generating diskimage '%s'.\n",fnbuf);
+		if (Disk)
+		{
+			Disk->ExportADF(fnbuf);
+		}
+	}
 	return true;
 }
 
@@ -219,7 +245,7 @@ u32 FormatDiskAmiga::Weave32(u16 odd, u16 even)
 	return (Spread16(odd)<<1)|Spread16(even);
 }
 
-void FormatDiskAmiga::ParseDirectory(u32 block, char const *prefix)
+void FormatDiskAmiga::ParseDirectory(int fd, u32 block, char const *prefix)
 {
 	SectorFileHead *base = (SectorFileHead *)Disk->GetSector(block);
 
@@ -242,10 +268,10 @@ void FormatDiskAmiga::ParseDirectory(u32 block, char const *prefix)
 				case -3: sectype='F'; break;
 				case 2: sectype='D'; break;
 			}
-			printf("# %-60s [%c] %8d %04d %4d %4d\n", sbuf2,sectype,swap(filehead->size), blk, swap(filehead->uid), swap(filehead->gid));
+			dprintf(fd, "%-60s [%c] %8d %04d %4d %4d\n", sbuf2,sectype,swap(filehead->size), blk, swap(filehead->uid), swap(filehead->gid));
 			if (swap(filehead->sec_type)==2)
 			{
-				ParseDirectory(blk, sbuf2);
+				ParseDirectory(fd, blk, sbuf2);
 			}
 		}
 	}

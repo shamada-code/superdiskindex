@@ -64,12 +64,12 @@ void *VirtualDisk::GetSector(u16 blk)
 
 void VirtualDisk::ExportADF(char const *fn)
 {
-	int fd = open("debug.adf", O_WRONLY|O_CREAT|O_TRUNC, S_IRUSR|S_IRGRP|S_IWUSR|S_IWGRP|S_IROTH);
-	for (int c=0; c<80; c++)
+	int fd = open(fn, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
+	for (int c=0; c<Cyls; c++)
 	{
-		for (int h=0; h<2; h++)
+		for (int h=0; h<Heads; h++)
 		{
-			for (int s=0; s<11; s++)
+			for (int s=0; s<Sects; s++)
 			{
 				write(fd, Disk.Cyls[c].Heads[h].Sectors[s].Data, SectSize);
 			}
