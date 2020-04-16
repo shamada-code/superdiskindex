@@ -48,7 +48,7 @@ void VirtualDisk::SetLayout(u8 c, u8 h, u8 s, u16 ss)
 
 void VirtualDisk::AddSector(u8 c, u8 h, u8 s, void *p, u32 size)
 {
-	if (Config.verbose>=1) printf("### Cyl %02d # Head %01d # Sect %02d\n", c,h,s);
+	if (Config.verbose>=1) printf("### Cyl %02d # Head %01d # Sect %02d\r", c,h,s);
 	memcpy(Disk.Cyls[c].Heads[h].Sectors[s].Data, p, min(size,SectSize));
 }
 
