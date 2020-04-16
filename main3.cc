@@ -64,52 +64,65 @@ int main(int argc, char **argv)
 		track_e=Config.track+1;
 	}
 
-	for (int t=track_s; t<track_e; t++)
+	int const FormatCount=2;
+	pFormat Formats[FormatCount];
+	Formats[0] = new FormatDiskIBM();
+	Formats[1] = new FormatDiskAmiga();
+
+	for (int formatidx=0; formatidx<FormatCount; formatidx++)
 	{
-		// scan track
-		int r0=0;
-		int rn=flux->GetRevolutions();
-		if (Config.revolution>=0) 
-		{
-			r0=Config.revolution;
-			rn=Config.revolution+1;
-		}
-		// scan revolution
-		for (int r=r0; r<rn; r++)
-		{
-			BitStream *bits=NULL;
+		Format *fmt = Formats[formatidx];
+		if (Config.verbose>=1) printf("##### Checking for '%s' Format \n", fmt->GetName());
 
+		//fmt->SetVirtualDisk(VD);
+
+		for (int pass=0; pass<2; pass++)
+		{
+			if (Config.verbose>=1) printf("# Pass %d\n", pass);
+			if (pass==1) 
 			{
-				// check ibm format
-				if (Config.verbose>=2) printf("### Checking for IBM Format \n");
-				Format *fmt = new FormatDiskIBM();
+				if (VD!=NULL) { delete(VD); VD=NULL; }
+				VD = new VirtualDisk();
+				VD->SetLayout(fmt->GetCyls(), fmt->GetHeads(), fmt->GetSects(), 512);
 				fmt->SetVirtualDisk(VD);
-				bits = new BitStream(fmt);
-				bits->InitSyncWords();
-
-				flux->ScanTrack(t,r, bits);
-
-				delete(fmt); fmt=NULL;
-				delete(bits); bits=NULL;
 			}
 
+			for (int t=track_s; t<track_e; t++)
 			{
-				// check amiga format
-				if (Config.verbose>=2) printf("### Checking for Amiga Format \n");
-				Format *fmt = new FormatDiskAmiga();
-				fmt->SetVirtualDisk(VD);
-				bits = new BitStream(fmt);
-				bits->InitSyncWords();
-
-				flux->ScanTrack(t,r, bits);
-
-				delete(fmt); fmt=NULL;
-				delete(bits); bits=NULL;
+				// scan track
+				int r0=0;
+				int rn=flux->GetRevolutions();
+				if (Config.revolution>=0) 
+				{
+					r0=Config.revolution;
+					rn=Config.revolution+1;
+				}
+				// scan revolution
+				for (int r=r0; r<rn; r++)
+				{
+					BitStream *bits=NULL;
+					bits = new BitStream(fmt);
+					bits->InitSyncWords();
+					flux->ScanTrack(t,r, bits);
+					delete(bits); bits=NULL;
+				}
 			}
+			if (pass==0) 
+			{
+				if(Config.verbose>=1) printf("# Disk geometry detected: C%02d/H%02d/S%02d\n", fmt->GetCyls(), fmt->GetHeads(), fmt->GetSects());
+			}
+			if (pass==1) 
+			{
+				printf("\n");
+				if (fmt->Analyze())
+				{
+					printf("# Looks like an valid disk.\n");
+					//VD->ExportADF("debug.adf");
+				}
+			}
+		
 		}
 	}
-
-	//VD->ExportADF("debug.adf");
 
 	flux->Close();
 	delete(flux);
