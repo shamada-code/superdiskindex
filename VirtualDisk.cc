@@ -29,6 +29,7 @@ void VirtualDisk::SetLayout(u8 c, u8 h, u8 s, u8 r, u16 ss)
 	Cyls=c; 
 	Heads=h; 
 	Sects=s;
+	Revs=r;
 	SectSize=ss; 
 
 	Disk.Cyls = new VDCyl[c];
