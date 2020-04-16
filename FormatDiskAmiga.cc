@@ -85,6 +85,9 @@ void FormatDiskAmiga::HandleBlock(Buffer *buffer)
 
 		if (disktype!=0xff) continue;
 
+		LastCyl = max(LastCyl, disktrack>>1);
+		LastSect = max(LastSect, disksect);
+
 		if (Config.verbose>=2) hexdump(sect_data.GetBuffer(), sect_data.GetFill());
 
 		Disk->AddSector(disktrack>>1, disktrack&1, disksect, sect_data.GetBuffer(), sect_data.GetFill());
