@@ -16,6 +16,37 @@
 
 ///////////////////////////////////////////////////////////
 
+u8 FormatDiskIBM::GetSyncWordCount()
+{
+	return 2;
+}
+
+u32 FormatDiskIBM::GetSyncWord(int n)
+{
+	switch (n)
+	{
+		case 0:
+			return 0x44895554;
+		case 1:
+			return 0x44895545;
+	}
+	return 0;
+}
+
+u32 FormatDiskIBM::GetSyncBlockLen(int n)
+{
+	switch (n)
+	{
+		case 0:
+			return (4+2)*2;
+		case 1:
+			return (512+2)*2;
+	}
+	return 0;
+}
+
+///////////////////////////////////////////////////////////
+
 // bool FormatDiskIBM::Detect()
 // {
 // 	Buffer *MFMBuffer = Bits->GetBuffer();

@@ -17,6 +17,11 @@ public:
 	FormatDiskAmiga() {}
 	virtual ~FormatDiskAmiga() {}
 
+	// called from BitStream
+	virtual u8 GetSyncWordCount();
+	virtual u32 GetSyncWord(int n);
+	virtual u32 GetSyncBlockLen(int n);
+
 	//virtual bool Detect();
 	virtual void HandleBlock(class Buffer *buffer);
 

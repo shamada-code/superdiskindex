@@ -25,6 +25,7 @@ public:
 	BitStream(class Format *fmt);
 	virtual ~BitStream();
 
+	void InitSyncWords();
 	void AddSyncWord(u32 dw, u32 payload_length);
 
 	void Feed(u8 bit);

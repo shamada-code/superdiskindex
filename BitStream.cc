@@ -29,6 +29,17 @@ BitStream::~BitStream()
 	delete(Data);
 }
 
+void BitStream::InitSyncWords()
+{
+	if (Fmt)
+	{
+		for (int i=0; i<Fmt->GetSyncWordCount(); i++)
+		{
+			AddSyncWord(Fmt->GetSyncWord(i), Fmt->GetSyncBlockLen(i));
+		}
+	}
+}
+
 void BitStream::AddSyncWord(u32 dw, u32 payload_len)
 {
 	SyncDefs[SyncDefCount].SyncWord = dw;

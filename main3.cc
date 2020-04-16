@@ -85,8 +85,7 @@ int main(int argc, char **argv)
 				Format *fmt = new FormatDiskIBM();
 				fmt->SetVirtualDisk(VD);
 				bits = new BitStream(fmt);
-				bits->AddSyncWord(0x44895554, (4+2)*2);
-				bits->AddSyncWord(0x44895545, (512+2)*2);
+				bits->InitSyncWords();
 
 				flux->ScanTrack(t,r, bits);
 
@@ -100,7 +99,7 @@ int main(int argc, char **argv)
 				Format *fmt = new FormatDiskAmiga();
 				fmt->SetVirtualDisk(VD);
 				bits = new BitStream(fmt);
-				bits->AddSyncWord(0x44894489, 0x1900*2);
+				bits->InitSyncWords();
 
 				flux->ScanTrack(t,r, bits);
 

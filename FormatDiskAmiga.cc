@@ -17,6 +17,25 @@
 
 ///////////////////////////////////////////////////////////
 
+
+u8 FormatDiskAmiga::GetSyncWordCount()
+{
+	return 1;
+}
+
+u32 FormatDiskAmiga::GetSyncWord(int n)
+{
+	return 0x44894489;
+}
+
+u32 FormatDiskAmiga::GetSyncBlockLen(int n)
+{
+	return 0x1900*2;
+
+}
+
+///////////////////////////////////////////////////////////
+
 // bool FormatDiskAmiga::Detect()
 // {
 
