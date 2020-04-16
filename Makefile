@@ -15,3 +15,8 @@ clean:
 
 $(TGT): $(OBJS)
 	$(CXX) -o $@ $(OBJS)
+
+%.o: %.cc Makefile
+	$(CXX) -MMD -Wall -O3 -g -o $@ -c $<
+
+-include $(OBJS:%.o=%.d)
