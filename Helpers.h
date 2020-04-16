@@ -17,3 +17,6 @@
 u16 swap16(u16 v);
 u8 printablechar(u8 b);
 void hexdump(u8 *data, u32 len);
+
+inline u16 swap(u16 v) { return ( ((((v)>>8)&0xff)<<0) | ((((v)>>0)&0xff)<<8) ); }
+inline u32 swap(u32 v) { return ( ((((v)>>24)&0xff)<<0) | ((((v)>>16)&0xff)<<8) | ((((v)>>8)&0xff)<<16) | ((((v)>>0)&0xff)<<24) ); }
