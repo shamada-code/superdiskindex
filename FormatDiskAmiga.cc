@@ -142,6 +142,23 @@ void FormatDiskAmiga::HandleBlock(Buffer *buffer)
 	}
 }
 
+bool FormatDiskAmiga::Analyze()
+{
+	SectorBoot0 *boot0 = (SectorBoot0 *)Disk->GetSector(0);
+	if (memcmp(boot0->magic_dos, "DOS", 3)==0) printf("# ANALYZE: boot block magic ok.\n");
+	else return false;
+
+	SectorRoot *root = (SectorRoot *)Disk->GetSector(swap(boot0->rootblock));
+	printf("0x%x\n", swap(root->type));
+	if (swap(root->type)==0x2) printf("# ANALYZE: root block type ok.\n");
+	else return false;
+
+	char sbuf[32]; strncpy(sbuf, root->name, root->name_len);
+	printf("# ANALYZE: volume label is '%s'.\n", sbuf);
+
+	return true;
+}
+
 u16 FormatDiskAmiga::Spread8(u8 data)
 {
 	return (

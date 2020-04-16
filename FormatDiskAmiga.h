@@ -25,6 +25,7 @@ public:
 
 	//virtual bool Detect();
 	virtual void HandleBlock(Buffer *buffer);
+	bool Analyze();
 
 	u16 Spread8(u8 data);
 	u32 Spread16(u16 data);

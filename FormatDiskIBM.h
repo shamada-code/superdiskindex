@@ -25,6 +25,7 @@ public:
 
 	//virtual bool Detect();
 	virtual void HandleBlock(Buffer *buffer);
+	virtual bool Analyze();
 
 protected:
 };

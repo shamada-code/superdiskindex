@@ -26,6 +26,7 @@ public:
 
 	//virtual bool Detect();
 	virtual void HandleBlock(Buffer *buffer)=0;
+	virtual bool Analyze()=0;
 
 	u8 GetCyls() { return LastCyl+1; }
 	u8 GetHeads() { return LastHead+1; }

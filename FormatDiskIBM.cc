@@ -76,3 +76,8 @@ void FormatDiskIBM::HandleBlock(Buffer *buffer)
 	}
 	//hexdump(buffer->GetBuffer(), min(buffer->GetFill(), 64));
 }
+
+bool FormatDiskIBM::Analyze()
+{
+	return false;
+}
