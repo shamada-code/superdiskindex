@@ -3,8 +3,8 @@ Development Notes
 
 ToDo
 ----
-* use all revolutions in file
-* add 'baking' of revolutions in VD
+* ~~use all revolutions in file~~
+* ~~add 'baking' of revolutions in VD~~
 * properly follow ht chain
 * add log method
 * add log cmdline option
