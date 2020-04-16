@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include "Types.h"
+
 ///////////////////////////////////////////////////////////
 
 struct streamblockdef
@@ -22,7 +24,7 @@ struct streamblockdef
 class BitStream
 {
 public:
-	BitStream(class Format *fmt);
+	BitStream(class Format *fmt, u8 currev);
 	virtual ~BitStream();
 
 	void InitSyncWords();
@@ -47,4 +49,5 @@ protected:
 	int SyncDefCount;
 	int ActiveSyncDef;
 	u32 PayloadCounter;
+	u8 CurRev;
 };

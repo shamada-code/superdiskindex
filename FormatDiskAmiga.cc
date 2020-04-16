@@ -125,7 +125,7 @@ u32 FormatDiskAmiga::GetSyncBlockLen(int n)
 // 	return false;
 // }
 
-void FormatDiskAmiga::HandleBlock(Buffer *buffer)
+void FormatDiskAmiga::HandleBlock(Buffer *buffer, int currev)
 {
 	//printf("Handling Block with size %d.\n", buffer->GetFill());
 	buffer->MFMDecode();
@@ -150,6 +150,8 @@ void FormatDiskAmiga::HandleBlock(Buffer *buffer)
 		u32 label3 = Weave32(swap16(p16[6]), swap16(p16[10]));
 		//u32 crc_head = Weave32(swap16(p16[11]), swap16(p16[12]));
 		//u32 crc_data = Weave32(swap16(p16[13]), swap16(p16[14]));
+		bool crc1ok = true;
+		bool crc2ok = true;
 		Buffer sect_data;
 		for (int i=0; i<128; i++)
 		{
@@ -175,7 +177,7 @@ void FormatDiskAmiga::HandleBlock(Buffer *buffer)
 
 		if (Disk!=NULL)
 		{
-			Disk->AddSector(disktrack>>1, disktrack&1, disksect, sect_data.GetBuffer(), sect_data.GetFill());
+			Disk->AddSector(disktrack>>1, disktrack&1, disksect, currev, sect_data.GetBuffer(), sect_data.GetFill(), crc1ok, crc2ok);
 		}
 	}
 }

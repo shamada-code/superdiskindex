@@ -26,7 +26,7 @@ public:
 	virtual u32 GetSyncBlockLen(int n);
 
 	//virtual bool Detect();
-	virtual void HandleBlock(Buffer *buffer);
+	virtual void HandleBlock(Buffer *buffer, int currev);
 	virtual bool Analyze();
 
 protected:

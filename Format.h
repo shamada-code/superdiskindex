@@ -27,7 +27,7 @@ public:
 	virtual u32 GetSyncBlockLen(int n)=0;
 
 	//virtual bool Detect();
-	virtual void HandleBlock(Buffer *buffer)=0;
+	virtual void HandleBlock(Buffer *buffer, int currev)=0;
 	virtual bool Analyze()=0;
 
 	u8 GetCyls() { return LastCyl+1; }

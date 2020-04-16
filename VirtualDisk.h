@@ -13,9 +13,18 @@
 
 ///////////////////////////////////////////////////////////
 
-struct VDSector
+struct VDRevolution
 {
 	u8 *Data;
+	bool used;
+	bool crc1ok;
+	bool crc2ok;
+};
+
+struct VDSector
+{
+	VDRevolution *Revs;
+	VDRevolution Merged;
 };
 
 struct VDHead
@@ -41,10 +50,12 @@ public:
 	VirtualDisk();
 	virtual ~VirtualDisk();
 
-	void SetLayout(u8 c, u8 h, u8 s, u16 ss);
-	void AddSector(u8 c, u8 h, u8 s, void *p, u32 size);
+	void SetLayout(u8 c, u8 h, u8 s, u8 r, u16 ss);
+	void AddSector(u8 c, u8 h, u8 s, u8 r, void *p, u32 size, bool crc1ok, bool crc2ok);
 	void *GetSector(u8 c, u8 h, u8 s);
 	void *GetSector(u16 blk);
+
+	void MergeRevs();
 
 	void ExportADF(char const *fn);
 	void ExportIMG(char const *fn);
@@ -60,6 +71,7 @@ protected:
 	u8 Cyls;
 	u8 Heads;
 	u8 Sects;
+	u8 Revs;
 	u16 SectSize;
 
 	VDDisk Disk;

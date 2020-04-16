@@ -63,7 +63,7 @@ u32 FormatDiskIBM::GetSyncBlockLen(int n)
 // 	return false;
 // }
 
-void FormatDiskIBM::HandleBlock(Buffer *buffer)
+void FormatDiskIBM::HandleBlock(Buffer *buffer, int currev)
 {
 	//printf("Handling Block with size %d.\n", buffer->GetFill());
 	buffer->MFMDecode();

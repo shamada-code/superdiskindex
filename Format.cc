@@ -22,7 +22,7 @@
 // 	return false;
 // }
 
-void Format::HandleBlock(class Buffer *buffer)
+void Format::HandleBlock(class Buffer *buffer, int currev)
 {
 
 }

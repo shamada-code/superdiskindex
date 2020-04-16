@@ -12,7 +12,7 @@
 #include "Buffer.h"
 #include "Format.h"
 
-BitStream::BitStream(Format *fmt)
+BitStream::BitStream(Format *fmt, u8 currev)
 {
 	Data=new Buffer();
 	Capture=0;
@@ -22,6 +22,7 @@ BitStream::BitStream(Format *fmt)
 	ActiveSyncDef=-1;
 	PayloadCounter=0;
 	Fmt=fmt;
+	CurRev=currev;
 }
 
 BitStream::~BitStream()
@@ -89,7 +90,7 @@ void BitStream::Feed(u8 bit)
 			PayloadCounter++;
 			if (PayloadCounter>=SyncDefs[ActiveSyncDef].PayloadLength)
 			{
-				Fmt->HandleBlock(Data);
+				Fmt->HandleBlock(Data, CurRev);
 				Data->Clear();
 				LostSync();
 			}
@@ -107,6 +108,6 @@ void BitStream::Flush()
 {
 	if (SyncFlag>0)
 	{
-		Fmt->HandleBlock(Data);
+		Fmt->HandleBlock(Data, CurRev);
 	}
 }

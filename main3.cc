@@ -101,7 +101,7 @@ int main(int argc, char **argv)
 			{
 				if (VD!=NULL) { delete(VD); VD=NULL; }
 				VD = new VirtualDisk();
-				VD->SetLayout(fmt->GetCyls(), fmt->GetHeads(), fmt->GetSects(), 512);
+				VD->SetLayout(fmt->GetCyls(), fmt->GetHeads(), fmt->GetSects(), flux->GetRevolutions(), 512);
 				fmt->SetVirtualDisk(VD);
 			}
 
@@ -119,7 +119,7 @@ int main(int argc, char **argv)
 				for (int r=r0; r<rn; r++)
 				{
 					BitStream *bits=NULL;
-					bits = new BitStream(fmt);
+					bits = new BitStream(fmt, r);
 					bits->InitSyncWords();
 					flux->ScanTrack(t,r, bits);
 					delete(bits); bits=NULL;
@@ -132,6 +132,7 @@ int main(int argc, char **argv)
 			if (pass==1) 
 			{
 				printf("\n");
+				VD->MergeRevs();
 				if (fmt->Analyze())
 				{
 					printf("# Looks like an valid disk.\n");
