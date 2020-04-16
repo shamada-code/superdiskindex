@@ -17,6 +17,13 @@ public:
 	Buffer() : Data(NULL),Size(0),Fill(0) {}
 	virtual ~Buffer() { free(Data); }
 
+	Buffer(Buffer const &src) 
+	{
+		Alloc(src.Size);
+		memcpy(Data, src.Data, src.Fill);
+		Fill=src.Fill;
+	}
+
 	void Alloc(u64 size);
 
 	void Push8(u8 db);
