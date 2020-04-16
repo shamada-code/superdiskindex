@@ -14,8 +14,9 @@ u16 swap16(u16 v) { return ( ((((v)>>8)&0xff)<<0) | ((((v)>>0)&0xff)<<8) ); }
 
 u8 printablechar(u8 b) { return (b<0x20)?'.':((b>=0x80)?'.':b); }
 
-void hexdump(u8 *data, u32 len)
+void hexdump(void *dataptr, u32 len)
 {
+	u8 *data=(u8 *)dataptr;
 	int o=0;
 	if ((len%16)>0) o=1;
 	for (u32 i=0; i<(len>>4)+o; i++)
