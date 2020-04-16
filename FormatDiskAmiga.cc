@@ -151,7 +151,6 @@ bool FormatDiskAmiga::Analyze()
 	else return false;
 
 	SectorRoot *root = (SectorRoot *)Disk->GetSector(swap(boot0->rootblock));
-	printf("0x%x\n", swap(root->type));
 	if (swap(root->type)==0x2) printf("# ANALYZE: root block type ok.\n");
 	else return false;
 
