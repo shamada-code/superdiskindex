@@ -7,16 +7,20 @@ OBJS+=MFM.o Helpers.o VirtualDisk.o
 
 CXXFLAGS=-Wall
 
-all: $(TGT)
+all: folders $(TGT)
+
+folders:
+	mkdir -p tmp
 
 clean:
-	rm -f $(OBJS)
+	rm -f $(OBJS:%.o=tmp/%.o)
+	rm -f $(OBJS:%.o=tmp/%.d)
 	rm -f $(TGT)
 
-$(TGT): $(OBJS)
-	$(CXX) -o $@ $(OBJS)
+$(TGT): $(OBJS:%.o=tmp/%.o)
+	$(CXX) -o $@ $(OBJS:%.o=tmp/%.o)
 
-%.o: %.cc Makefile
+tmp/%.o: %.cc Makefile
 	$(CXX) -MMD -Wall -O3 -o $@ -c $<
 
--include $(OBJS:%.o=%.d)
+-include $(OBJS:%.o=tmp/%.d)
