@@ -1,0 +1,8 @@
+# Exclude object files
+*.o
+
+# Exclude final binary
+superdiskindex
+
+# Exclude testing folder
+testing/
