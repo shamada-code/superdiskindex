@@ -145,8 +145,8 @@ void FormatDiskAmiga::HandleBlock(Buffer *buffer)
 		u32 label1 = Weave32(swap16(p16[4]), swap16(p16[8]));
 		u32 label2 = Weave32(swap16(p16[5]), swap16(p16[9]));
 		u32 label3 = Weave32(swap16(p16[6]), swap16(p16[10]));
-		u32 crc_head = Weave32(swap16(p16[11]), swap16(p16[12]));
-		u32 crc_data = Weave32(swap16(p16[13]), swap16(p16[14]));
+		//u32 crc_head = Weave32(swap16(p16[11]), swap16(p16[12]));
+		//u32 crc_data = Weave32(swap16(p16[13]), swap16(p16[14]));
 		Buffer sect_data;
 		for (int i=0; i<128; i++)
 		{
@@ -223,7 +223,7 @@ void FormatDiskAmiga::ParseDirectory(u32 block, char const *prefix)
 {
 	SectorFileHead *base = (SectorFileHead *)Disk->GetSector(block);
 
-	for (int i=0; i<countof(base->data_blocks); i++)
+	for (u32 i=0; i<countof(base->data_blocks); i++)
 	{
 		u32 blk = swap(base->data_blocks[i]);
 		if (blk>0)
