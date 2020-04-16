@@ -24,7 +24,7 @@ Supported Formats
 * IBM/PC 3.5" DD/HD
 * Amiga DD
 * Atari DD/HD
-more to come
+* *more to come*
 
 Known Bugs
 ----------
