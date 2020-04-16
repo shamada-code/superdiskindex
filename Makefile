@@ -17,6 +17,6 @@ $(TGT): $(OBJS)
 	$(CXX) -o $@ $(OBJS)
 
 %.o: %.cc Makefile
-	$(CXX) -MMD -Wall -O3 -g -o $@ -c $<
+	$(CXX) -MMD -Wall -O3 -o $@ -c $<
 
 -include $(OBJS:%.o=%.d)
