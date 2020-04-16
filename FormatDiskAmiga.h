@@ -10,6 +10,7 @@
 #pragma once
 
 #include "Format.h"
+#include "Buffer.h"
 
 class FormatDiskAmiga : public Format
 {
@@ -23,7 +24,7 @@ public:
 	virtual u32 GetSyncBlockLen(int n);
 
 	//virtual bool Detect();
-	virtual void HandleBlock(class Buffer *buffer);
+	virtual void HandleBlock(Buffer *buffer);
 
 	u16 Spread8(u8 data);
 	u32 Spread16(u16 data);
