@@ -127,6 +127,7 @@ u32 FormatDiskAmiga::GetSyncBlockLen(int n)
 
 void FormatDiskAmiga::HandleBlock(Buffer *buffer, int currev)
 {
+	Buffer *rawbuffer = new Buffer(*buffer);
 	//printf("Handling Block with size %d.\n", buffer->GetFill());
 	buffer->MFMDecode();
 	// u8 *db = buffer->GetBuffer();
@@ -144,14 +145,19 @@ void FormatDiskAmiga::HandleBlock(Buffer *buffer, int currev)
 	{
 		u16 *p16 = (u16 *)(buffer->GetBuffer())+(s*0x110);
 		u32 info = Weave32(swap16(p16[1]), swap16(p16[2]));
-		u32 label0 = Weave32(swap16(p16[3]), swap16(p16[7]));
-		u32 label1 = Weave32(swap16(p16[4]), swap16(p16[8]));
-		u32 label2 = Weave32(swap16(p16[5]), swap16(p16[9]));
-		u32 label3 = Weave32(swap16(p16[6]), swap16(p16[10]));
-		//u32 crc_head = Weave32(swap16(p16[11]), swap16(p16[12]));
-		//u32 crc_data = Weave32(swap16(p16[13]), swap16(p16[14]));
-		bool crc1ok = true;
-		bool crc2ok = true;
+		//u32 label0 = Weave32(swap16(p16[3]), swap16(p16[7]));
+		//u32 label1 = Weave32(swap16(p16[4]), swap16(p16[8]));
+		//u32 label2 = Weave32(swap16(p16[5]), swap16(p16[9]));
+		//u32 label3 = Weave32(swap16(p16[6]), swap16(p16[10]));
+		u32 crc_head = Weave32(swap16(p16[11]), swap16(p16[12]));
+		u32 crc_data = Weave32(swap16(p16[13]), swap16(p16[14]));
+		u32 crc_head_calc = chksum32(rawbuffer->GetBuffer()+(s*0x440+4), 10)&0x55555555;
+		u32 crc_data_calc = chksum32(rawbuffer->GetBuffer()+(s*0x440+60), 256)&0x55555555;
+
+		//printf("#$CRCh: %08x / %08x / %08x\n", crc_head, crc_head_calc, crc_head^crc_head_calc);
+		//printf("#$CRCd: %08x / %08x / %08x\n", crc_data, crc_data_calc, crc_data^crc_data_calc);
+		bool crc1ok = (crc_head^crc_head_calc)==0;
+		bool crc2ok = (crc_data^crc_data_calc)==0;
 		Buffer sect_data;
 		for (int i=0; i<128; i++)
 		{
@@ -163,23 +169,29 @@ void FormatDiskAmiga::HandleBlock(Buffer *buffer, int currev)
 		u8 disksect = ((info>>8)&0xff);
 		u8 diskleft = ((info>>0)&0xff);
 		if (Config.verbose>=2) printf("# Sector info + %02x + %02x + %02x + %02x\n", disktype, disktrack, disksect, diskleft );
-		if (Config.verbose>=2) printf("# Sector label + %08x\n", label0 );
-		if (Config.verbose>=2) printf("# Sector label + %08x\n", label1 );
-		if (Config.verbose>=2) printf("# Sector label + %08x\n", label2 );
-		if (Config.verbose>=2) printf("# Sector label + %08x\n", label3 );
+		if (Config.verbose>=2) printf("# Sector header chksum %s\n", crc1ok?"OK":"BAD" );
+		if (Config.verbose>=2) printf("# Sector data chksum %s\n", crc2ok?"OK":"BAD" );
+		//if (Config.verbose>=2) printf("# Sector label + %08x\n", label0 );
+		//if (Config.verbose>=2) printf("# Sector label + %08x\n", label1 );
+		//if (Config.verbose>=2) printf("# Sector label + %08x\n", label2 );
+		//if (Config.verbose>=2) printf("# Sector label + %08x\n", label3 );
 
 		if (disktype!=0xff) continue;
 
-		LastCyl = max(LastCyl, disktrack>>1);
-		LastSect = max(LastSect, disksect);
+		if (crc1ok)
+		{
+			LastCyl = max(LastCyl, disktrack>>1);
+			LastSect = max(LastSect, disksect);
+		}
 
-		if (Config.verbose>=2) hexdump(sect_data.GetBuffer(), sect_data.GetFill());
+		if (Config.verbose>=3) hexdump(sect_data.GetBuffer(), sect_data.GetFill());
 
-		if (Disk!=NULL)
+		if ((Disk!=NULL)&&(crc1ok))
 		{
 			Disk->AddSector(disktrack>>1, disktrack&1, disksect, currev, sect_data.GetBuffer(), sect_data.GetFill(), crc1ok, crc2ok);
 		}
 	}
+	delete(rawbuffer);
 }
 
 bool FormatDiskAmiga::Analyze()
@@ -277,4 +289,14 @@ void FormatDiskAmiga::ParseDirectory(int fd, u32 block, char const *prefix)
 			}
 		}
 	}
+}
+
+u32 FormatDiskAmiga::chksum32(u8 *p, u32 count)
+{
+	u32 crc = 0;
+	for (u32 i=0; i<count; i++)
+	{
+		crc ^= (((u32)(p[i*4+0]))<<24) | (((u32)(p[i*4+1]))<<16) | (((u32)(p[i*4+2]))<<8) | (((u32)(p[i*4+3]))<<0);
+	}
+	return crc;
 }

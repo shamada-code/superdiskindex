@@ -38,4 +38,5 @@ public:
 
 protected:
 	void ParseDirectory(int fd, u32 block, char const *prefix);
+	u32 chksum32(u8 *p, u32 count);
 };
