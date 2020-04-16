@@ -52,6 +52,16 @@ void VirtualDisk::AddSector(u8 c, u8 h, u8 s, void *p, u32 size)
 	memcpy(Disk.Cyls[c].Heads[h].Sectors[s].Data, p, min(size,SectSize));
 }
 
+void *VirtualDisk::GetSector(u8 c, u8 h, u8 s)
+{
+	return Disk.Cyls[c].Heads[h].Sectors[s].Data;
+}
+
+void *VirtualDisk::GetSector(u16 blk)
+{
+	return Disk.Cyls[blk2cyl(blk)].Heads[blk2head(blk)].Sectors[blk2sect(blk)].Data;
+}
+
 void VirtualDisk::ExportADF(char const *fn)
 {
 	int fd = open("debug.adf", O_WRONLY|O_CREAT|O_TRUNC, S_IRUSR|S_IRGRP|S_IWUSR|S_IWGRP|S_IROTH);

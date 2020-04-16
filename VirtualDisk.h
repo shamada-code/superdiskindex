@@ -43,6 +43,8 @@ public:
 
 	void SetLayout(u8 c, u8 h, u8 s, u16 ss);
 	void AddSector(u8 c, u8 h, u8 s, void *p, u32 size);
+	void *GetSector(u8 c, u8 h, u8 s);
+	void *GetSector(u16 blk);
 
 	void ExportADF(char const *fn);
 	void ExportIMG(char const *fn);
