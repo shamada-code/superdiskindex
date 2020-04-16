@@ -40,3 +40,5 @@ protected:
 	u8 LastHead;
 	u8 LastSect;
 };
+
+typedef Format *pFormat;
