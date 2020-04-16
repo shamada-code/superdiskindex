@@ -16,6 +16,8 @@
 
 ///////////////////////////////////////////////////////////
 
+char const *FormatDiskIBM::GetName() { return "IBM/PC/Atari"; }
+
 u8 FormatDiskIBM::GetSyncWordCount()
 {
 	return 2;

@@ -63,6 +63,8 @@ struct SectorRoot
 
 ///////////////////////////////////////////////////////////
 
+char const *FormatDiskAmiga::GetName() { return "Amiga"; }
+
 u8 FormatDiskAmiga::GetSyncWordCount()
 {
 	return 1;

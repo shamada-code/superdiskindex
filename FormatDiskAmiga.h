@@ -18,6 +18,8 @@ public:
 	FormatDiskAmiga() {}
 	virtual ~FormatDiskAmiga() {}
 
+	virtual char const *GetName();
+
 	// called from BitStream
 	virtual u8 GetSyncWordCount();
 	virtual u32 GetSyncWord(int n);

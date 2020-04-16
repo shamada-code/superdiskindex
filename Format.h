@@ -19,6 +19,8 @@ public:
 
 	void SetVirtualDisk(class VirtualDisk *disk) { Disk=disk; }
 
+	virtual char const *GetName()=0;
+
 	// called from BitStream
 	virtual u8 GetSyncWordCount()=0;
 	virtual u32 GetSyncWord(int n)=0;
