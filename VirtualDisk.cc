@@ -80,6 +80,7 @@ void *VirtualDisk::GetSector(u16 blk)
 void VirtualDisk::MergeRevs()
 {
 	printf("# Merging sector copies.\n");
+	u32 bad_count=0;
 	for (int c=0; c<Cyls; c++)
 	{
 		for (int h=0; h<Heads; h++)
@@ -132,11 +133,13 @@ void VirtualDisk::MergeRevs()
 				}
 				if (!ok)
 				{
-					printf("# MISSING: No usable copy of sector %02d/%02d/%02d found.\n", c,h,s);
+					if (Config.verbose>=2) printf("# MISSING: No usable copy of sector %02d/%02d/%02d found.\n", c,h,s);
+					bad_count++;
 				}
 			}
 		}
 	}
+	if (Config.verbose>=1) printf("# Final Disk has %d/%d missing or bad sectors! That's %.1f%% of the disk damaged.\n", bad_count, Cyls*Heads*Sects, (float)(100*bad_count)/(float)(Cyls*Heads*Sects));
 	printf("# Merge done.\n");
 }
 
