@@ -17,6 +17,51 @@
 
 ///////////////////////////////////////////////////////////
 
+#pragma pack(1)
+
+struct SectorBoot0
+{
+	u8 magic_dos[3];
+	u8 flags;
+	u32 crc;
+	u32 rootblock;
+	u8 code[512-12];
+};
+
+struct SectorRoot
+{
+	u32 type;
+	u32 header_key;
+	u32 high_seq;
+	u32 ht_size;
+	u32 first_data;
+	u32 crc;
+	u32 ht[0x48];
+	u32 bm_flag;
+	u32 bm_pages[25];
+	u32 bm_ext;
+	u32 r_days;
+	u32 r_mins;
+	u32 r_ticks;
+	u8 name_len;
+	char name[30];
+	u8 unused_0;
+	u32 unused_1;
+	u32 v_days;
+	u32 v_mins;
+	u32 v_ticks;
+	u32 c_days;
+	u32 c_mins;
+	u32 c_ticks;
+	u32 next_hash;
+	u32 parent_dir;
+	u32 extension;
+	u32 sec_type;
+};
+
+#pragma pack(0)
+
+///////////////////////////////////////////////////////////
 
 u8 FormatDiskAmiga::GetSyncWordCount()
 {
