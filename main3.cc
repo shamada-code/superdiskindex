@@ -115,6 +115,12 @@ int main(int argc, char **argv)
 			clog(1,"# Pass %d\n", pass);
 			if (pass==1) 
 			{
+				if ((fmt->GetCyls()==1) && (fmt->GetHeads()==2) && (fmt->GetSects()==1))
+				{
+					// empty disk - we can skip this Pass.
+					clog(1,"# No data found. Skipping pass.\n");
+					continue;
+				}
 				if (VD!=NULL) { delete(VD); VD=NULL; }
 				VD = new VirtualDisk();
 				VD->SetLayout(fmt->GetCyls(), fmt->GetHeads(), fmt->GetSects(), flux->GetRevolutions(), 512);
