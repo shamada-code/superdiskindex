@@ -192,22 +192,14 @@ void VirtualDisk::MergeRevs()
 void VirtualDisk::ExportADF(char const *fn)
 {
 	int fd = open(fn, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
-	for (int c=0; c<Cyls; c++)
-	{
-		for (int h=0; h<Heads; h++)
-		{
-			for (int s=0; s<Sects; s++)
-			{
-				write(fd, Disk.Cyls[c].Heads[h].Sectors[s].Merged.Data, SectSize);
-			}
-		}
-	}
+	write(fd, FinalDisk->GetBuffer(), FinalDisk->GetFill());
 	close(fd);
 }
 
 void VirtualDisk::ExportIMG(char const *fn)
 {
-
+	// same format as adf
+	ExportADF(fn);
 }
 
 void VirtualDisk::ExportListing(char const *fn)
