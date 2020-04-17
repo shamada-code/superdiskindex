@@ -15,7 +15,7 @@
 class FormatDiskIBM : public Format
 {
 public:
-	FormatDiskIBM() {}
+	FormatDiskIBM() : cur_c(-1),cur_h(-1),cur_s(-1) {}
 	virtual ~FormatDiskIBM() {}
 
 	virtual char const *GetName();
@@ -30,4 +30,5 @@ public:
 	virtual bool Analyze();
 
 protected:
+	int cur_c,cur_h,cur_s;
 };
