@@ -25,6 +25,7 @@ public:
 	}
 
 	void Alloc(u64 size);
+	void SetFill(u64 fill); // set fill manually (if memcpy'ing data into buffer)
 
 	void Push8(u8 db);
 	void Push16(u16 dw);

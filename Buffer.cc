@@ -30,6 +30,11 @@ void Buffer::Alloc(u64 size)
 	Size=size;
 }
 
+void Buffer::SetFill(u64 fill)
+{
+	Fill=fill;
+}
+
 void Buffer::Push8(u8 db)
 {
 	RequireSize(Fill+1);
