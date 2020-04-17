@@ -133,11 +133,11 @@ void FormatDiskAmiga::HandleBlock(Buffer *buffer, int currev)
 	// u8 *db = buffer->GetBuffer();
 	// if ( (db[0]==0xa1) && (db[1]==0xfe) )
 	// {
-	// 	if (Config.verbose>=2) printf("# Sector Header + %02d/%01d/%02d + %04x\n", db[2], db[3], db[4], (db[6]<<8)|db[7]);
+	// 	clog(2,"# Sector Header + %02d/%01d/%02d + %04x\n", db[2], db[3], db[4], (db[6]<<8)|db[7]);
 	// }
 	// if ( (db[0]==0xa1) && (db[1]==0xfb) )
 	// {
-	// 	if (Config.verbose>=2) printf("# Sector Data + %04x\n", (db[2+512+0]<<8)|db[2+512+1]);
+	// 	clog(2,"# Sector Data + %04x\n", (db[2+512+0]<<8)|db[2+512+1]);
 	// }
 	//u16 *p16 = (u16 *)(buffer->GetBuffer());
 	int sc = buffer->GetFill()/0x220;
@@ -168,13 +168,13 @@ void FormatDiskAmiga::HandleBlock(Buffer *buffer, int currev)
 		u8 disktrack = ((info>>16)&0xff);
 		u8 disksect = ((info>>8)&0xff);
 		u8 diskleft = ((info>>0)&0xff);
-		if (Config.verbose>=2) printf("# Sector info + %02x + %02x + %02x + %02x\n", disktype, disktrack, disksect, diskleft );
-		if (Config.verbose>=2) printf("# Sector header chksum %s\n", crc1ok?"OK":"BAD" );
-		if (Config.verbose>=2) printf("# Sector data chksum %s\n", crc2ok?"OK":"BAD" );
-		//if (Config.verbose>=2) printf("# Sector label + %08x\n", label0 );
-		//if (Config.verbose>=2) printf("# Sector label + %08x\n", label1 );
-		//if (Config.verbose>=2) printf("# Sector label + %08x\n", label2 );
-		//if (Config.verbose>=2) printf("# Sector label + %08x\n", label3 );
+		clog(2,"# Sector info + %02x + %02x + %02x + %02x\n", disktype, disktrack, disksect, diskleft );
+		clog(2,"# Sector header chksum %s\n", crc1ok?"OK":"BAD" );
+		clog(2,"# Sector data chksum %s\n", crc2ok?"OK":"BAD" );
+		//clog(2,"# Sector label + %08x\n", label0 );
+		//clog(2,"# Sector label + %08x\n", label1 );
+		//clog(2,"# Sector label + %08x\n", label2 );
+		//clog(2,"# Sector label + %08x\n", label3 );
 
 		if (disktype!=0xff) continue;
 
@@ -197,21 +197,21 @@ void FormatDiskAmiga::HandleBlock(Buffer *buffer, int currev)
 bool FormatDiskAmiga::Analyze()
 {
 	SectorBoot0 *boot0 = (SectorBoot0 *)Disk->GetSector(0);
-	if (memcmp(boot0->magic_dos, "DOS", 3)==0) printf("# ANALYZE: boot block magic ok.\n");
+	if (memcmp(boot0->magic_dos, "DOS", 3)==0) clog(1,"# ANALYZE: boot block magic ok.\n");
 	else return false;
 
 	SectorRoot *root = (SectorRoot *)Disk->GetSector(swap(boot0->rootblock));
-	if (swap(root->type)==0x2) printf("# ANALYZE: root block type ok.\n");
+	if (swap(root->type)==0x2) clog(1,"# ANALYZE: root block type ok.\n");
 	else return false;
 
 	char sbuf[32]; strncpy(sbuf, root->name, root->name_len);
-	printf("# ANALYZE: volume label is '%s'.\n", sbuf);
+	clog(1,"# ANALYZE: volume label is '%s'.\n", sbuf);
 
 	// Listing
 	if (Config.gen_listing)
 	{
 		char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.lst", Config.fn_out);
-		printf("# Generating file listing '%s'.\n",fnbuf);
+		clog(1,"# Generating file listing '%s'.\n",fnbuf);
 
 		int fd = open(fnbuf, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
 		if (fd>=0)
@@ -229,7 +229,7 @@ bool FormatDiskAmiga::Analyze()
 	if (Config.gen_export)
 	{
 		char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.adf", Config.fn_out);
-		printf("# Generating diskimage '%s'.\n",fnbuf);
+		clog(1,"# Generating diskimage '%s'.\n",fnbuf);
 		if (Disk)
 		{
 			Disk->ExportADF(fnbuf);

@@ -25,7 +25,7 @@ void Buffer::RequireSize(u64 size)
 void Buffer::Alloc(u64 size)
 {
 	if (size<64) size=64;
-	//if (Config.verbose>=3) printf("#BUFREALLOC: %d bytes\n", size);
+	//clog(3,"#BUFREALLOC: %d bytes\n", size);
 	Data = (u8 *)realloc(Data, size);
 	Size=size;
 }

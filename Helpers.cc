@@ -25,7 +25,7 @@ void hexdump(void *dataptr, u32 len)
 	if ((len%16)>0) o=1;
 	for (u32 i=0; i<(len>>4)+o; i++)
 	{
-		printf("%08x  |  %02x %02x %02x %02x %02x %02x %02x %02x  %02x %02x %02x %02x %02x %02x %02x %02x  | %c%c%c%c%c%c%c%c %c%c%c%c%c%c%c%c\n",
+		clog(3,"%08x  |  %02x %02x %02x %02x %02x %02x %02x %02x  %02x %02x %02x %02x %02x %02x %02x %02x  | %c%c%c%c%c%c%c%c %c%c%c%c%c%c%c%c\n",
 			i*0x10,
 			(i*0x10+0x0<len)?data[i*0x10+0x0]:0,
 			(i*0x10+0x1<len)?data[i*0x10+0x1]:0,
@@ -70,7 +70,7 @@ int __clog_fd=-1;
 void clog(int lvl, char const *fmt, ...)
 {
 	va_list args;
-	if ((Config.gen_log)&&(__clog_fd>=0))
+	if ((Config.gen_log)&&(__clog_fd>=0)&&(2>=lvl))
 	{
 		va_start(args,fmt);
 		vdprintf(__clog_fd, fmt, args);

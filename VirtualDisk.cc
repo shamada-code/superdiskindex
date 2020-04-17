@@ -60,7 +60,7 @@ void VirtualDisk::SetLayout(u8 c, u8 h, u8 s, u8 r, u16 ss)
 
 void VirtualDisk::AddSector(u8 c, u8 h, u8 s, u8 r, void *p, u32 size, bool crc1ok, bool crc2ok)
 {
-	if (Config.verbose>=1) printf("### Cyl %02d # Head %01d # Sect %02d\r", c,h,s);
+	clog(1,"### Cyl %02d # Head %01d # Sect %02d\r", c,h,s);
 	memcpy(Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].Data, p, min(size,SectSize));
 	Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].used=true;
 	Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc1ok=crc1ok;
@@ -133,14 +133,14 @@ void VirtualDisk::MergeRevs()
 				}
 				if (!ok)
 				{
-					if (Config.verbose>=2) printf("# MISSING: No usable copy of sector %02d/%02d/%02d found.\n", c,h,s);
+					clog(2,"# MISSING: No usable copy of sector %02d/%02d/%02d found.\n", c,h,s);
 					bad_count++;
 				}
 			}
 		}
 	}
-	if (Config.verbose>=1) printf("# Final Disk has %d/%d missing or bad sectors! That's %.1f%% of the disk damaged.\n", bad_count, Cyls*Heads*Sects, (float)(100*bad_count)/(float)(Cyls*Heads*Sects));
-	printf("# Merge done.\n");
+	clog(1,"# Final Disk has %d/%d missing or bad sectors! That's %.1f%% of the disk damaged.\n", bad_count, Cyls*Heads*Sects, (float)(100*bad_count)/(float)(Cyls*Heads*Sects));
+	clog(1,"# Merge done.\n");
 }
 
 void VirtualDisk::ExportADF(char const *fn)

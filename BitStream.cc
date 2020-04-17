@@ -11,6 +11,7 @@
 #include "BitStream.h"
 #include "Buffer.h"
 #include "Format.h"
+#include "Helpers.h"
 
 BitStream::BitStream(Format *fmt, u8 currev)
 {
@@ -76,7 +77,7 @@ void BitStream::Feed(u8 bit)
 				Store( (SyncDefs[i].SyncWord>>16)&0xff );
 				Store( (SyncDefs[i].SyncWord>>8)&0xff );
 				Store( (SyncDefs[i].SyncWord>>0)&0xff );
-				if (Config.verbose>=3) printf("#SYNC\n");
+				clog(3,"#SYNC\n");
 			}
 		}
 	} else {
@@ -100,7 +101,7 @@ void BitStream::Feed(u8 bit)
 
 void BitStream::Store(u8 val)
 {
-	if (Config.verbose>=3) printf("#RAW: %02x\n", val);
+	//clog(3,"#RAW: %02x\n", val);
 	Data->Push8(val);
 }
 

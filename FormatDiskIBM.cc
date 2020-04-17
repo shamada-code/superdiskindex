@@ -70,11 +70,11 @@ void FormatDiskIBM::HandleBlock(Buffer *buffer, int currev)
 	u8 *db = buffer->GetBuffer();
 	if ( (db[0]==0xa1) && (db[1]==0xfe) )
 	{
-		if (Config.verbose>=2) printf("# Sector Header + %02d/%01d/%02d + %04x\n", db[2], db[3], db[4], (db[6]<<8)|db[7]);
+		clog(2,"# Sector Header + %02d/%01d/%02d + %04x\n", db[2], db[3], db[4], (db[6]<<8)|db[7]);
 	}
 	if ( (db[0]==0xa1) && (db[1]==0xfb) )
 	{
-		if (Config.verbose>=2) printf("# Sector Data + %04x\n", (db[2+512+0]<<8)|db[2+512+1]);
+		clog(2,"# Sector Data + %04x\n", (db[2+512+0]<<8)|db[2+512+1]);
 	}
 	//hexdump(buffer->GetBuffer(), min(buffer->GetFill(), 64));
 }

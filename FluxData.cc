@@ -74,14 +74,11 @@ bool FluxData::Open(char const *filename)
 
 	// parse scp header
 	scp_header *head = (scp_header *)Data;
-	if (Config.verbose>=2)
-	{
-		printf("###_SCP_File_info_#################################\n");
-		printf("# File magic:  %c%c%c\n", head->magic[0], head->magic[1], head->magic[2]);
-		printf("# Version:     %02x\n", head->version);
-		printf("# Revolutions: %d\n", head->num_revs);
-		printf("# Tracks:      %d-%d\n", head->start_track, head->end_track);
-	}
+	clog(2,"###_SCP_File_info_#################################\n");
+	clog(2,"# File magic:  %c%c%c\n", head->magic[0], head->magic[1], head->magic[2]);
+	clog(2,"# Version:     %02x\n", head->version);
+	clog(2,"# Revolutions: %d\n", head->num_revs);
+	clog(2,"# Tracks:      %d-%d\n", head->start_track, head->end_track);
 
 	return true;
 }
@@ -124,18 +121,12 @@ void FluxData::ScanTrack(int track, int rev, BitStream *bits)
 	int r = rev;
 	scp_header *head = (scp_header *)Data;
 	track_header *th = (track_header *)(Data+head->track_head_offset[track]);
-	if (Config.verbose>=2)
-	{
-		printf("###_Track_info_#################################\n");
-		printf("# Track:       %d\n", th->track_num);
-		printf("# Magic:       %c%c%c\n", th->magic[0], th->magic[1], th->magic[2]);
-		//for (int r=r0; r<rn; r++)
-		{
-			printf("# Rev %d Duration:    %.2fms\n", r, th->revs[r].duration*25.0f*0.001f*0.001f);
-			printf("# Rev %d FluxCount:   %d\n", r, th->revs[r].fluxcount);
-			printf("# Rev %d Offset:      0x%08x\n", r, th->revs[r].data_offset);
-		}
-	}
+	clog(2,"###_Track_info_#################################\n");
+	clog(2,"# Track:       %d\n", th->track_num);
+	clog(2,"# Magic:       %c%c%c\n", th->magic[0], th->magic[1], th->magic[2]);
+	clog(2,"# Rev %d Duration:    %.2fms\n", r, th->revs[r].duration*25.0f*0.001f*0.001f);
+	clog(2,"# Rev %d FluxCount:   %d\n", r, th->revs[r].fluxcount);
+	clog(2,"# Rev %d Offset:      0x%08x\n", r, th->revs[r].data_offset);
 
 	//for (int r=r0; r<rn; r++)
 	//{
@@ -179,7 +170,7 @@ u16 FluxData::DetectTimings(void *data, u32 size)
 	u64 thist[65536] = {0};
 	for (u32 b=0; b<size; b++)
 	{
-		//if (options.verbose>=3) printf("%04x\n", data[b]);
+		//clog(3,"%04x\n", data[b]);
 		u16 val = ((dw[b]&0xff)<<8) | ((dw[b]&0xff00)>>8); // words are endian flipped in scp file
 		thist[val]++;
 	}
@@ -202,7 +193,7 @@ u16 FluxData::DetectTimings(void *data, u32 size)
 	for (int hi=0; hi<hs; hi++)
 	{
 		//printf("%.1f us (%04x); %lu\n", (float)topi[hi]*25.0f*0.001f, topi[hi], topv[hi]);
-		//if (Config.verbose>=3) printf("%d; %lu\n", topi[hi], topv[hi]);
+		//clog(3,"%d; %lu\n", topi[hi], topv[hi]);
 	}
 	int n0 = 0;
 	int bw = topi[n0]>>3;
@@ -210,16 +201,13 @@ u16 FluxData::DetectTimings(void *data, u32 size)
 	while ( (n1<hs) && (topi[n1]>(topi[n0]-bw)) && (topi[n1]<(topi[n0]+bw)) ) n1++;
 	int n2 = n1+1;
 	while ( (n2<hs) && ( ((topi[n2]>(topi[n0]-bw)) && (topi[n2]<(topi[n0]+bw))) || ((topi[n2]>(topi[n1]-bw)) && (topi[n2]<(topi[n1]+bw))) ) ) n2++;
-	//if (Config.verbose>=3) printf("%d/%d/%d\n",n0,n1,n2);
+	//clog(3,"%d/%d/%d\n",n0,n1,n2);
 	int t8ms = max( max(topi[n0], topi[n1]), topi[n2]);
 	int t1 = t8ms/4;
-	if (Config.verbose>=2) 
-	{
-		printf("###_Timing_info_#################################\n");
-		printf("# Short Seq:     %d (%.1fus)\n", topi[n0], (float)topi[n0]*25.0f*0.001f);
-		printf("# Med Seq:       %d (%.1fus)\n", topi[n1], (float)topi[n1]*25.0f*0.001f);
-		printf("# Long Seq:      %d (%.1fus)\n", topi[n2], (float)topi[n2]*25.0f*0.001f);
-		printf("# Bit Frequency: %d (%.1fus / %.1fkHz)\n", t1, (float)t1*25.0f*0.001f, 1000.0f/((float)t1*25.0f*0.001f));
-	}
+	clog(2,"###_Timing_info_#################################\n");
+	clog(2,"# Short Seq:     %d (%.1fus)\n", topi[n0], (float)topi[n0]*25.0f*0.001f);
+	clog(2,"# Med Seq:       %d (%.1fus)\n", topi[n1], (float)topi[n1]*25.0f*0.001f);
+	clog(2,"# Long Seq:      %d (%.1fus)\n", topi[n2], (float)topi[n2]*25.0f*0.001f);
+	clog(2,"# Bit Frequency: %d (%.1fus / %.1fkHz)\n", t1, (float)t1*25.0f*0.001f, 1000.0f/((float)t1*25.0f*0.001f));
 	return t1;
 }

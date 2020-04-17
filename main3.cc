@@ -98,11 +98,11 @@ int main(int argc, char **argv)
 		VirtualDisk *VD=NULL;
 
 		Format *fmt = Formats[formatidx];
-		if (Config.verbose>=1) printf("##### Checking for '%s' Format \n", fmt->GetName());
+		clog(1,"##### Checking for '%s' Format \n", fmt->GetName());
 
 		for (int pass=0; pass<2; pass++)
 		{
-			if (Config.verbose>=1) printf("# Pass %d\n", pass);
+			clog(1,"# Pass %d\n", pass);
 			if (pass==1) 
 			{
 				if (VD!=NULL) { delete(VD); VD=NULL; }
@@ -133,15 +133,15 @@ int main(int argc, char **argv)
 			}
 			if (pass==0) 
 			{
-				if(Config.verbose>=1) printf("# Disk geometry detected: C%02d/H%02d/S%02d\n", fmt->GetCyls(), fmt->GetHeads(), fmt->GetSects());
+				clog(1,"# Disk geometry detected: C%02d/H%02d/S%02d\n", fmt->GetCyls(), fmt->GetHeads(), fmt->GetSects());
 			}
 			if (pass==1) 
 			{
-				printf("\n");
+				clog(1,"\n");
 				VD->MergeRevs();
 				if (fmt->Analyze())
 				{
-					printf("# Looks like an valid disk.\n");
+					clog(1,"# Looks like an valid disk.\n");
 					//VD->ExportADF("debug.adf");
 				}
 			}
