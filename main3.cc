@@ -111,6 +111,7 @@ int main(int argc, char **argv)
 
 		for (int pass=0; pass<2; pass++)
 		{
+			clog(1,"###################################\n");
 			clog(1,"# Pass %d\n", pass);
 			if (pass==1) 
 			{
