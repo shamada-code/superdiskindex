@@ -20,4 +20,5 @@ WishList
 * add c64 5.25" format
 * add c64 3.5" format
 * add apple formats
+* generate scp files from adf/img
 
