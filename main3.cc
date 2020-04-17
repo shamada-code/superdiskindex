@@ -27,6 +27,9 @@ void print_help()
 	printf("     --listing             | Generate file listing to file <basename>.lst\n");
 	printf("     --export              | Generate disk image <basename>.{adf,img}\n");
 	printf("     --log                 | Generate logfile <basename>.log\n");
+	printf("     --format-any          | Test for any known formats (default)\n");
+	printf("     --format-amiga        | Test only for amiga format\n");
+	printf("     --format-ibm          | Test only for ibm pc/atari format\n");
 	printf("  -v                       | Increase verbosity (can be applied more than once)\n");
 	printf("\n");
 }
@@ -52,6 +55,9 @@ int main(int argc, char **argv)
 		{"export", 0, NULL, 'e' },
 		{"log", 0, NULL, 'g' },
 		{"help", 0, NULL, 'h' },
+		{"format-any", 0, &Config.format, FMT_ANY },
+		{"format-amiga", 0, &Config.format, FMT_AMIGA },
+		{"format-ibm", 0, &Config.format, FMT_IBM },
 		{0,0,0,0}
 	};
 	int ret = 0;
@@ -88,10 +94,13 @@ int main(int argc, char **argv)
 		track_e=Config.track+1;
 	}
 
-	int const FormatCount=2;
-	pFormat Formats[FormatCount];
-	Formats[0] = new FormatDiskIBM();
-	Formats[1] = new FormatDiskAmiga();
+	int FormatCount=Config.format==FMT_ANY?2:1;
+	pFormat *Formats = new pFormat[FormatCount];
+	int formatidx=0;
+	if ((Config.format==FMT_ANY)||(Config.format==FMT_IBM))
+		Formats[formatidx++] = new FormatDiskIBM();
+	if ((Config.format==FMT_ANY)||(Config.format==FMT_AMIGA))
+		Formats[formatidx++] = new FormatDiskAmiga();
 
 	for (int formatidx=0; formatidx<FormatCount; formatidx++)
 	{

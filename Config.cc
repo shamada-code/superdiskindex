@@ -19,5 +19,6 @@ config_t Config =
     1, // verbose
     false, // listing
     false, // export
-    false //log
+    false, // log
+    FMT_ANY // format
 };

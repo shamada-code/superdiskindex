@@ -16,9 +16,17 @@ struct config_t
 	int track;
 	int revolution;
 	int verbose;
-	bool gen_listing;
-	bool gen_export;
-	bool gen_log;
+	int gen_listing;
+	int gen_export;
+	int gen_log;
+	int format;
+};
+
+enum DiskFormat
+{
+	FMT_ANY = 0,
+	FMT_AMIGA = 1,
+	FMT_IBM = 2,
 };
 
 extern config_t Config;
