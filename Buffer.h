@@ -19,6 +19,10 @@ public:
 
 	Buffer(Buffer const &src) 
 	{
+		Data=NULL;
+		Size=0;
+		Fill=0;
+
 		Alloc(src.Size);
 		memcpy(Data, src.Data, src.Fill);
 		Fill=src.Fill;
