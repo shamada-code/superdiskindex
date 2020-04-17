@@ -205,7 +205,6 @@ void FormatDiskAmiga::HandleBlock(Buffer *buffer, int currev)
 			Disk->AddSector(disktrack>>1, disktrack&1, disksect, currev, sect_data.GetBuffer(), sect_data.GetFill(), crc1ok, crc2ok);
 		}
 	}
- 	clog(2,"# Track end\n");
 	delete(rawbuffer);
 }
 
