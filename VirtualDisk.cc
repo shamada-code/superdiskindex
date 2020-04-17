@@ -13,11 +13,13 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "Buffer.h"
 
 ///////////////////////////////////////////////////////////
 
 VirtualDisk::VirtualDisk()
 {
+	FinalDisk=NULL;
 	Cyls=0;
 	Heads=0;
 	Sects=0;
@@ -36,7 +38,7 @@ VirtualDisk::~VirtualDisk()
 				for (int l=0; l<Revs; l++)
 				{
 					delete[](Disk.Cyls[i].Heads[j].Sectors[k].Revs[l].Data);
-}
+				}
 				delete[](Disk.Cyls[i].Heads[j].Sectors[k].Revs);
 			}
 			delete[](Disk.Cyls[i].Heads[j].Sectors);
@@ -45,6 +47,7 @@ VirtualDisk::~VirtualDisk()
 	}
 	delete[](Disk.Cyls);
 
+	delete(FinalDisk);
 }
 
 void VirtualDisk::SetLayout(u8 c, u8 h, u8 s, u8 r, u16 ss)
@@ -72,7 +75,7 @@ void VirtualDisk::SetLayout(u8 c, u8 h, u8 s, u8 r, u16 ss)
 					Disk.Cyls[i].Heads[j].Sectors[k].Revs[l].crc1ok=false;
 					Disk.Cyls[i].Heads[j].Sectors[k].Revs[l].crc2ok=false;
 				}
-				Disk.Cyls[i].Heads[j].Sectors[k].Merged.Data = new u8[ss];
+				Disk.Cyls[i].Heads[j].Sectors[k].Merged.Data = NULL;
 				Disk.Cyls[i].Heads[j].Sectors[k].Merged.used=false;
 				Disk.Cyls[i].Heads[j].Sectors[k].Merged.crc1ok=false;
 				Disk.Cyls[i].Heads[j].Sectors[k].Merged.crc2ok=false;
@@ -92,17 +95,35 @@ void VirtualDisk::AddSector(u8 c, u8 h, u8 s, u8 r, void *p, u32 size, bool crc1
 
 void *VirtualDisk::GetSector(u8 c, u8 h, u8 s)
 {
-	return Disk.Cyls[c].Heads[h].Sectors[s].Merged.Data;
+	if (FinalDisk==NULL)
+	{
+		clog(0, "ERR: VirtualDisk has not been merged yet. This is a code bug.\n");
+		return NULL;
+	}
+	return FinalDisk->GetBuffer()+(((c*Heads+h)*Sects+s)*SectSize);
 }
 
 void *VirtualDisk::GetSector(u16 blk)
 {
-	return Disk.Cyls[blk2cyl(blk)].Heads[blk2head(blk)].Sectors[blk2sect(blk)].Merged.Data;
+	if (FinalDisk==NULL)
+	{
+		clog(0, "ERR: VirtualDisk has not been merged yet. This is a code bug.\n");
+		return NULL;
+	}
+	return FinalDisk->GetBuffer()+blk*SectSize;
 }
 
 void VirtualDisk::MergeRevs()
 {
 	clog(1, "# Merging sector copies.\n");
+
+	if (FinalDisk!=NULL)
+	{
+		clog(0, "ERR: VirtualDisk was already merged. This is a code bug.\n");
+		return;
+	}
+	FinalDisk = new Buffer();
+	FinalDisk->Alloc(Cyls*Heads*Sects*SectSize);
 
 	u32 bad_count=0;
 	for (int c=0; c<Cyls; c++)
@@ -120,7 +141,7 @@ void VirtualDisk::MergeRevs()
 						(Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc1ok) &&
 						(Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc2ok) )
 					{
-						memcpy(Disk.Cyls[c].Heads[h].Sectors[s].Merged.Data, Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].Data, SectSize);
+						memcpy(FinalDisk->GetBuffer()+(((c*Heads+h)*Sects+s)*SectSize), Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].Data, SectSize);
 						Disk.Cyls[c].Heads[h].Sectors[s].Merged.used = Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].used;
 						Disk.Cyls[c].Heads[h].Sectors[s].Merged.crc1ok = Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc1ok;
 						Disk.Cyls[c].Heads[h].Sectors[s].Merged.crc2ok = Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc2ok;
@@ -135,7 +156,7 @@ void VirtualDisk::MergeRevs()
 						( (Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc1ok) ||
 						(Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc2ok) ) )
 					{
-						memcpy(Disk.Cyls[c].Heads[h].Sectors[s].Merged.Data, Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].Data, SectSize);
+						memcpy(FinalDisk->GetBuffer()+(((c*Heads+h)*Sects+s)*SectSize), Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].Data, SectSize);
 						Disk.Cyls[c].Heads[h].Sectors[s].Merged.used = Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].used;
 						Disk.Cyls[c].Heads[h].Sectors[s].Merged.crc1ok = Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc1ok;
 						Disk.Cyls[c].Heads[h].Sectors[s].Merged.crc2ok = Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc2ok;
@@ -148,7 +169,7 @@ void VirtualDisk::MergeRevs()
 						(!ok) &&
 						(Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].used) )
 					{
-						memcpy(Disk.Cyls[c].Heads[h].Sectors[s].Merged.Data, Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].Data, SectSize);
+						memcpy(FinalDisk->GetBuffer()+(((c*Heads+h)*Sects+s)*SectSize), Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].Data, SectSize);
 						Disk.Cyls[c].Heads[h].Sectors[s].Merged.used = Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].used;
 						Disk.Cyls[c].Heads[h].Sectors[s].Merged.crc1ok = Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc1ok;
 						Disk.Cyls[c].Heads[h].Sectors[s].Merged.crc2ok = Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc2ok;

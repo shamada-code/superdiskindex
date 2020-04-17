@@ -75,4 +75,5 @@ protected:
 	u16 SectSize;
 
 	VDDisk Disk;
+	class Buffer *FinalDisk;
 };
