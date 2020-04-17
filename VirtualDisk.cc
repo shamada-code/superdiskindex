@@ -124,6 +124,7 @@ void VirtualDisk::MergeRevs()
 	}
 	FinalDisk = new Buffer();
 	FinalDisk->Alloc(Cyls*Heads*Sects*SectSize);
+	FinalDisk->SetFill(Cyls*Heads*Sects*SectSize);
 
 	u32 bad_count=0;
 	for (int c=0; c<Cyls; c++)
