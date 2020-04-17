@@ -185,8 +185,13 @@ void VirtualDisk::MergeRevs()
 			}
 		}
 	}
-	clog(1,"# Final Disk has %d/%d missing or bad sectors! That's %.1f%% of the disk damaged.\n", bad_count, Cyls*Heads*Sects, (float)(100*bad_count)/(float)(Cyls*Heads*Sects));
 	clog(1,"# Merge done.\n");
+	if ((Cyls==1)&&(Sects==1))
+	{
+		clog(1,"# Final Disk has no data.\n");
+	} else {
+		clog(1,"# Final Disk has %d/%d missing or bad sectors! That's %.1f%% of the disk damaged.\n", bad_count, Cyls*Heads*Sects, (float)(100*bad_count)/(float)(Cyls*Heads*Sects));
+	}
 }
 
 void VirtualDisk::ExportADF(char const *fn)
