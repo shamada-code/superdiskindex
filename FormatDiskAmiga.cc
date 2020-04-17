@@ -212,11 +212,26 @@ bool FormatDiskAmiga::Analyze()
 {
 	SectorBoot0 *boot0 = (SectorBoot0 *)Disk->GetSector(0);
 	if (memcmp(boot0->magic_dos, "DOS", 3)==0) clog(1,"# ANALYZE: boot block magic ok.\n");
-	else return false;
+	else {
+		clog(1,"# ANALYZE: boot block magic FAILED ('%c%c%c'!='%c%c%c').\n",boot0->magic_dos[0], boot0->magic_dos[1], boot0->magic_dos[2], 'D','O','S');
+		return false;
+	}
 
-	SectorRoot *root = (SectorRoot *)Disk->GetSector(swap(boot0->rootblock));
+	u32 rootblkidx = swap(boot0->rootblock);
+	if ((rootblkidx==0)||(rootblkidx>(Disk->GetLayoutCylinders()*Disk->GetLayoutHeads()*Disk->GetLayoutSectors())))
+	{
+		clog(2, "# Warning: Rootblock setting in Bootblock is bad. Using default location for root block.\n");
+		if (Disk->GetLayoutSectors()==11) rootblkidx=880; // DD Disk
+		else if (Disk->GetLayoutSectors()==22) rootblkidx=1760; // HD Disk
+		else rootblkidx=880; // assume DD Disk?
+	}
+	SectorRoot *root = (SectorRoot *)Disk->GetSector(rootblkidx);
 	if (swap(root->type)==0x2) clog(1,"# ANALYZE: root block type ok.\n");
-	else return false;
+	else {
+		clog(1,"# ANALYZE: root block @ %d type FAILED ($%08x!=$%08x).\n", swap(boot0->rootblock), swap(root->type),0x2);
+		hexdump(root, 512);
+		return false;
+	}
 
 	char sbuf[32]; strncpy(sbuf, root->name, root->name_len);
 	clog(1,"# ANALYZE: volume label is '%s'.\n", sbuf);
