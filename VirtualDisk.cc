@@ -18,10 +18,33 @@
 
 VirtualDisk::VirtualDisk()
 {
+	Cyls=0;
+	Heads=0;
+	Sects=0;
+	Revs=0;
+	SectSize=0;
 }
 
 VirtualDisk::~VirtualDisk()
 {
+	for (int i=0; i<Cyls; i++)
+	{
+		for (int j=0; j<Heads; j++)
+		{
+			for (int k=0; k<Sects; k++)
+			{
+				for (int l=0; l<Revs; l++)
+				{
+					delete[](Disk.Cyls[i].Heads[j].Sectors[k].Revs[l].Data);
+}
+				delete[](Disk.Cyls[i].Heads[j].Sectors[k].Revs);
+			}
+			delete[](Disk.Cyls[i].Heads[j].Sectors);
+		}
+		delete[](Disk.Cyls[i].Heads);
+	}
+	delete[](Disk.Cyls);
+
 }
 
 void VirtualDisk::SetLayout(u8 c, u8 h, u8 s, u8 r, u16 ss)
