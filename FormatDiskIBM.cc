@@ -230,10 +230,13 @@ void FormatDiskIBM::ParseDirectory(int fd, u32 block, u32 blkcount, char const *
 						rootdir[i].attrs==DEA_HID?'H':'.',
 						rootdir[i].name[0]==0xe5?"<DELETED>":""
 						);
-					if (rootdir[i].attrs==DEA_DIR)
+					if (
+						(rootdir[i].attrs==DEA_DIR) &&
+						(memcmp(rootdir[i].name, ".       ",8)!=0) &&
+						(memcmp(rootdir[i].name, "..      ",8)!=0) )
 					{
 						// disabled because we're missing a cluster->sector mapping
-						//ParseDirectory(fd, rootdir[i].first_cluster, 1, sbuf);
+						ParseDirectory(fd, cluster2sector(rootdir[i].first_cluster), 1, sbuf);
 					}
 				}
 			}
