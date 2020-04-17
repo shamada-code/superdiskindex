@@ -102,7 +102,8 @@ void *VirtualDisk::GetSector(u16 blk)
 
 void VirtualDisk::MergeRevs()
 {
-	printf("# Merging sector copies.\n");
+	clog(1, "# Merging sector copies.\n");
+
 	u32 bad_count=0;
 	for (int c=0; c<Cyls; c++)
 	{
