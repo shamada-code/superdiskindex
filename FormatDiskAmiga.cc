@@ -114,7 +114,7 @@ u32 FormatDiskAmiga::GetSyncWord(int n)
 
 u32 FormatDiskAmiga::GetSyncBlockLen(int n)
 {
-	return 0x1900*2;
+	return 0x438;//0x1900*2;
 
 }
 
