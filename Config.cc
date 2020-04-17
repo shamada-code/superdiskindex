@@ -18,5 +18,6 @@ config_t Config =
     -1, // rev
     1, // verbose
     false, // listing
-    false // export
+    false, // export
+    false //log
 };

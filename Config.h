@@ -18,6 +18,7 @@ struct config_t
 	int verbose;
 	bool gen_listing;
 	bool gen_export;
+	bool gen_log;
 };
 
 extern config_t Config;

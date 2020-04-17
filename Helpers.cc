@@ -9,6 +9,10 @@
 
 #include "Global.h"
 #include "Helpers.h"
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdarg.h>
 
 u16 swap16(u16 v) { return ( ((((v)>>8)&0xff)<<0) | ((((v)>>0)&0xff)<<8) ); }
 
@@ -57,4 +61,39 @@ void hexdump(void *dataptr, u32 len)
 			(i*0x10+0xf<len)?printablechar(data[i*0x10+0xf]):' '
 			);
 	}
+}
+
+/////////////////
+
+int __clog_fd=-1;
+
+void clog(int lvl, char const *fmt, ...)
+{
+	va_list args;
+	if ((Config.gen_log)&&(__clog_fd>=0))
+	{
+		va_start(args,fmt);
+		vdprintf(__clog_fd, fmt, args);
+		va_end(args);
+	}
+	if (Config.verbose>=lvl) {
+		va_start(args,fmt);
+		vprintf(fmt, args);
+		va_end(args);
+	}
+}
+
+void clog_init()
+{
+	if ((Config.gen_log)&&(strlen(Config.fn_out)>0))
+	{
+		char sbuf[65100];
+		sprintf(sbuf, "%s.log", Config.fn_out);
+	__clog_fd = open(sbuf, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
+	}
+}
+
+void clog_exit()
+{
+	if (clog>=0) close(__clog_fd);
 }

@@ -14,6 +14,7 @@
 #include "FormatDiskAmiga.h"
 #include "VirtualDisk.h"
 #include <getopt.h>
+#include "Helpers.h"
 
 void print_help()
 {
@@ -25,6 +26,7 @@ void print_help()
 	printf("  -r,--rev <revnum>        | Only use revolution <revnum>\n");
 	printf("     --listing             | Generate file listing to file <basename>.lst\n");
 	printf("     --export              | Generate disk image <basename>.{adf,img}\n");
+	printf("     --log                 | Generate logfile <basename>.log\n");
 	printf("  -v                       | Increase verbosity (can be applied more than once)\n");
 	printf("\n");
 }
@@ -48,6 +50,7 @@ int main(int argc, char **argv)
 		{"rev", 1, NULL, 'r' },
 		{"listing", 0, NULL, 'l' },
 		{"export", 0, NULL, 'e' },
+		{"log", 0, NULL, 'g' },
 		{"help", 0, NULL, 'h' },
 		{0,0,0,0}
 	};
@@ -62,14 +65,17 @@ int main(int argc, char **argv)
 			if (ret=='v') Config.verbose++;
 			if (ret=='l') Config.gen_listing=true;
 			if (ret=='e') Config.gen_export=true;
+			if (ret=='g') Config.gen_log=true;
 			if ((ret=='h')||(ret=='?')) { print_help(); return 1; }
 		}
 	}
 
 	// check param compatability
 	if (strlen(Config.fn_in)==0) { printf("No input file specified (-i).\n"); print_help(); return 1; }
-	if ((Config.gen_export||Config.gen_listing)&&(strlen(Config.fn_out)==0)) { printf("Listing and Export modes need output basename defined (-o).\n"); print_help(); return 1; }
+	if ((Config.gen_export||Config.gen_listing||Config.gen_log)&&(strlen(Config.fn_out)==0)) { printf("Listing,Log and Export modes need output basename defined (-o).\n"); print_help(); return 1; }
 	if ((Config.gen_export||Config.gen_listing)&&(Config.track>=0)) { printf("Listing and Export modes are not working with a limited track selection.\n"); print_help(); return 1; }
+
+	clog_init();
 
 	// Initialize FluxData
 	FluxData *flux = new FluxData();
@@ -145,6 +151,8 @@ int main(int argc, char **argv)
 
 	flux->Close();
 	delete(flux);
+
+	clog_exit();
 
 	return 0;
 }
