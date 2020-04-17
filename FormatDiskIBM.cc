@@ -205,7 +205,7 @@ void FormatDiskIBM::ParseDirectory(int fd, u32 block, u32 blkcount, char const *
 {
 	bootsect_fat12 *boot0 = (bootsect_fat12 *)(Disk->GetSector(0));
 	int entries_per_sect = boot0->bpb.byte_per_sect/sizeof(dir_entry);
-	for (int rs=0; rs<blkcount; rs++)
+	for (u32 rs=0; rs<blkcount; rs++)
 	{
 		dir_entry *rootdir = (dir_entry *)(Disk->GetSector(block+rs));
 		for (int i=0; i<entries_per_sect; i++)
