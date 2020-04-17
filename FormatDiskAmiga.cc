@@ -17,6 +17,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "CRC.h"
 
 ///////////////////////////////////////////////////////////
 
@@ -150,14 +151,19 @@ void FormatDiskAmiga::HandleBlock(Buffer *buffer, int currev)
 		//u32 label2 = Weave32(swap16(p16[5]), swap16(p16[9]));
 		//u32 label3 = Weave32(swap16(p16[6]), swap16(p16[10]));
 		u32 crc_head = Weave32(swap16(p16[11]), swap16(p16[12]));
+		CRC32_xor crc_head_calc(0);
+		crc_head_calc.Block(rawbuffer->GetBuffer()+(s*0x440+4), 10, true);
+
 		u32 crc_data = Weave32(swap16(p16[13]), swap16(p16[14]));
-		u32 crc_head_calc = chksum32(rawbuffer->GetBuffer()+(s*0x440+4), 10)&0x55555555;
-		u32 crc_data_calc = chksum32(rawbuffer->GetBuffer()+(s*0x440+60), 256)&0x55555555;
+		CRC32_xor crc_data_calc(0);
+		crc_data_calc.Block(rawbuffer->GetBuffer()+(s*0x440+60), 256, true);
+		//u32 crc_head_calc = chksum32(rawbuffer->GetBuffer()+(s*0x440+4), 10)&0x55555555;
+		//u32 crc_data_calc = chksum32(rawbuffer->GetBuffer()+(s*0x440+60), 256)&0x55555555;
 
 		//printf("#$CRCh: %08x / %08x / %08x\n", crc_head, crc_head_calc, crc_head^crc_head_calc);
 		//printf("#$CRCd: %08x / %08x / %08x\n", crc_data, crc_data_calc, crc_data^crc_data_calc);
-		bool crc1ok = (crc_head^crc_head_calc)==0;
-		bool crc2ok = (crc_data^crc_data_calc)==0;
+		bool crc1ok = (crc_head^(crc_head_calc.Get()&0x55555555))==0;
+		bool crc2ok = (crc_data^(crc_data_calc.Get()&0x55555555))==0;
 		Buffer sect_data;
 		for (int i=0; i<128; i++)
 		{
@@ -291,12 +297,12 @@ void FormatDiskAmiga::ParseDirectory(int fd, u32 block, char const *prefix)
 	}
 }
 
-u32 FormatDiskAmiga::chksum32(u8 *p, u32 count)
-{
-	u32 crc = 0;
-	for (u32 i=0; i<count; i++)
-	{
-		crc ^= (((u32)(p[i*4+0]))<<24) | (((u32)(p[i*4+1]))<<16) | (((u32)(p[i*4+2]))<<8) | (((u32)(p[i*4+3]))<<0);
-	}
-	return crc;
-}
+// u32 FormatDiskAmiga::chksum32(u8 *p, u32 count)
+// {
+// 	u32 crc = 0;
+// 	for (u32 i=0; i<count; i++)
+// 	{
+// 		crc ^= (((u32)(p[i*4+0]))<<24) | (((u32)(p[i*4+1]))<<16) | (((u32)(p[i*4+2]))<<8) | (((u32)(p[i*4+3]))<<0);
+// 	}
+// 	return crc;
+// }
