@@ -15,6 +15,7 @@ ToDo
 * add atari boot block checksum
 * add sector map output
 * add filesystem checks
+* add custom formatting options for output basename
 
 WishList
 --------
