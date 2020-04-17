@@ -49,8 +49,8 @@ struct bootsect_st {
 };
 
 struct dir_entry {
-    u8 name[8];
-    u8 ext[3];
+    char name[8];
+    char ext[3];
     u8 attrs;
     u8 unk1;
     u8 create_time;
