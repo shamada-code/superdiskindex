@@ -30,5 +30,7 @@ public:
 	virtual bool Analyze();
 
 protected:
+	void ParseDirectory(int fd, u32 block, u32 blkcount, char const *prefix);
+
 	int cur_c,cur_h,cur_s;
 };
