@@ -15,7 +15,7 @@
 class FormatDiskIBM : public Format
 {
 public:
-	FormatDiskIBM() : cur_c(-1),cur_h(-1),cur_s(-1) {}
+	FormatDiskIBM() : cur_c(-1),cur_h(-1),cur_s(-1),LayoutLocked(false) {}
 	virtual ~FormatDiskIBM() {}
 
 	virtual char const *GetName();
@@ -34,4 +34,5 @@ protected:
 	u32 cluster2sector(u32 cls);
 
 	int cur_c,cur_h,cur_s;
+	bool LayoutLocked;
 };
