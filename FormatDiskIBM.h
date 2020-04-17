@@ -31,6 +31,7 @@ public:
 
 protected:
 	void ParseDirectory(int fd, u32 block, u32 blkcount, char const *prefix);
+	u32 cluster2sector(u32 cls);
 
 	int cur_c,cur_h,cur_s;
 };

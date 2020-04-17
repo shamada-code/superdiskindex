@@ -240,3 +240,11 @@ void FormatDiskIBM::ParseDirectory(int fd, u32 block, u32 blkcount, char const *
 		}
 	}
 }
+
+u32 FormatDiskIBM::cluster2sector(u32 cls)
+{
+	bootsect_fat12 *boot0 = (bootsect_fat12 *)(Disk->GetSector(0));
+	u32 ssa = boot0->bpb.reserved_sectors + boot0->bpb.fat_count*boot0->bpb.sectors_per_fat + ((32*boot0->bpb.root_entries)/boot0->bpb.byte_per_sect);
+	u32 lsn = ssa+(cls-2)*boot0->bpb.sect_per_cluster;
+	return lsn;
+}
