@@ -192,7 +192,7 @@ bool FormatDiskIBM::Analyze()
 	clog(2, "# BPB: sectors_per_fat = %d\n",boot0->bpb.sectors_per_fat);
 	clog(2, "# BPB: sectors_per_track = %d\n",boot0->bpb.sectors_per_track);
 	clog(2, "# BPB: head_count = %d\n",boot0->bpb.head_count);
-	if (boot0->signature!=0xaa55) { clog(1, "# BOOT: Signature mismatch (%04x!=%04x).\n", boot0->signature, 0xaa55); return false; }
+	if (boot0->signature!=0xaa55) { clog(1, "# BOOT: Signature mismatch (%04x!=%04x).\n", boot0->signature, 0xaa55); /*return false;*/ }
 	clog(1, "# BOOT: Signature OK.\n");
 	if (boot0->bpb.byte_per_sect!=512) { clog(1, "# BOOT: Not the expected sector size (%d!=%d).\n", boot0->bpb.byte_per_sect, 512); return false; }
 	clog(1, "# BOOT: Sector Size OK.\n");
