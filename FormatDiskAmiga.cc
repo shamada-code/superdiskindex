@@ -128,6 +128,13 @@ u32 FormatDiskAmiga::GetSyncBlockLen(int n)
 
 void FormatDiskAmiga::HandleBlock(Buffer *buffer, int currev)
 {
+	//printf("Handling Block with size %d ($%08x).\n", buffer->GetFill(), buffer->GetFill());
+	u32 expected_size = (0x1900*2+4);
+	if (buffer->GetFill()!=expected_size)
+	{
+	 	clog(2,"# Wrong track size ($%04x!=$%04x)\n", buffer->GetFill(), expected_size);
+		return;
+	}
 	Buffer *rawbuffer = new Buffer(*buffer);
 	//printf("Handling Block with size %d.\n", buffer->GetFill());
 	buffer->MFMDecode();
@@ -183,6 +190,7 @@ void FormatDiskAmiga::HandleBlock(Buffer *buffer, int currev)
 		//clog(2,"# Sector label + %08x\n", label3 );
 
 		if (disktype!=0xff) continue;
+		if (disktrack>=164) continue; // either a very weird format or bad data
 
 		if (crc1ok)
 		{
