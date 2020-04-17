@@ -15,6 +15,9 @@
 #include "Helpers.h"
 #include "CRC.h"
 #include "VirtualDisk.h"
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 ///////////////////////////////////////////////////////////
 
@@ -194,11 +197,39 @@ bool FormatDiskIBM::Analyze()
 	if (boot0->bpb.byte_per_sect!=512) { clog(1, "# BOOT: Not the expected sector size (%d!=%d).\n", boot0->bpb.byte_per_sect, 512); return false; }
 	clog(1, "# BOOT: Sector Size OK.\n");
 
-	//root folder
-	int rootblk = boot0->bpb.reserved_sectors+boot0->bpb.fat_count*boot0->bpb.sectors_per_fat;
-	int root_sects = boot0->bpb.root_entries*sizeof(dir_entry)/boot0->bpb.byte_per_sect; 
-	ParseDirectory(0, rootblk, root_sects, "/");
-	return false;
+	// Listing
+	if (Config.gen_listing)
+	{
+		char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.lst", Config.fn_out);
+		clog(1,"# Generating file listing '%s'.\n",fnbuf);
+
+		int fd = open(fnbuf, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
+		if (fd>=0)
+		{
+			int rootblk = boot0->bpb.reserved_sectors+boot0->bpb.fat_count*boot0->bpb.sectors_per_fat;
+			int root_sects = boot0->bpb.root_entries*sizeof(dir_entry)/boot0->bpb.byte_per_sect; 
+
+			dprintf(fd, "Volume: %s\n", "N/A");
+			dprintf(fd, "\n");
+			dprintf(fd, "%-60s     Size  Flags\n", "Filename");
+			dprintf(fd, "-----------------------------------------------------------------------------------------\n");
+			ParseDirectory(fd, rootblk, root_sects, "/");
+		}
+		close(fd);
+	}
+
+	// Export
+	if (Config.gen_export)
+	{
+		char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.img", Config.fn_out);
+		clog(1,"# Generating diskimage '%s'.\n",fnbuf);
+		if (Disk)
+		{
+			Disk->ExportIMG(fnbuf);
+		}
+	}
+
+	return true;
 }
 
 void FormatDiskIBM::ParseDirectory(int fd, u32 block, u32 blkcount, char const *prefix)
@@ -219,7 +250,7 @@ void FormatDiskIBM::ParseDirectory(int fd, u32 block, u32 blkcount, char const *
 					char sbuf0[8+1]; memcpy(sbuf0, rootdir[i].name, 8); sbuf0[8]=0; for (int si=7; si>=0; si--) if (sbuf0[si]==0x20) sbuf0[si]=0;
 					char sbuf1[3+1]; memcpy(sbuf1, rootdir[i].ext, 3); sbuf1[3]=0; for (int si=2; si>=0; si--) if (sbuf1[si]==0x20) sbuf1[si]=0;
 					char sbuf[4096]; sprintf(sbuf, "%s%s%s%s%s", prefix, sbuf0, sbuf1[0]!=0?".":"", sbuf1, rootdir[i].attrs==DEA_DIR?"/":"");
-					clog(1, "%-60s %8d <%c%c%c%c%c%c> %s\n", 
+					dprintf(fd, "%-60s %8d  <%c%c%c%c%c%c> %s\n", 
 						sbuf,
 						rootdir[i].size, 
 						rootdir[i].attrs==DEA_VOL?'V':'.',
