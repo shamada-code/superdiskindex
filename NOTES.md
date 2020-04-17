@@ -6,11 +6,15 @@ ToDo
 * ~~use all revolutions in file~~
 * ~~add 'baking' of revolutions in VD~~
 * properly follow ht chain
-* add log method
-* add log cmdline option
-* add amiga sector crc checks
-* use only sectors with correct crc (amiga+ibm)
-* extend ibm format code with functions already working in amiga mode
+* ~~add log method~~
+* ~~add log cmdline option~~
+* ~~add amiga sector crc checks~~
+* ~~use only sectors with correct crc (amiga+ibm)~~
+* ~~extend ibm format code with functions already working in amiga mode~~
+* follow fat chain for subdirs
+* add atari boot block checksum
+* add sector map output
+* add filesystem checks
 
 WishList
 --------
