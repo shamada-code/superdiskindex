@@ -1,9 +1,13 @@
 # Exclude temp/object/dep files
 *.o
 *.d
+tmp/
 
 # Exclude final binary
 superdiskindex
 
 # Exclude testing folder
 testing/
+
+# vscode files
+settings.json
