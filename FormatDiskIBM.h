@@ -29,6 +29,9 @@ public:
 	virtual void HandleBlock(Buffer *buffer, int currev);
 	virtual bool Analyze();
 
+	virtual char const *GetDiskTypeString();
+	virtual char const *GetDiskSubTypeString();
+
 protected:
 	void ParseDirectory(int fd, u32 block, u32 blkcount, char const *prefix);
 	u32 cluster2sector(u32 cls);

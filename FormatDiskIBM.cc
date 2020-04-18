@@ -21,6 +21,24 @@
 
 ///////////////////////////////////////////////////////////
 
+enum DiskTypes
+{
+	DT_UNKNOWN = 0,
+	DT_IBMPC,
+	DT_ATARIST,
+};
+
+enum DiskSubTypes
+{
+	DST_UNKNOWN = 0,
+	DST_3_5DD,
+	DST_3_5HD,
+	DST_5_25DD,
+	DST_5_25HD,
+};
+
+///////////////////////////////////////////////////////////
+
 #pragma pack(1)
 
 struct bpb_dos30 {
@@ -219,6 +237,25 @@ bool FormatDiskIBM::Analyze()
 	if (boot0->bpb.byte_per_sect!=512) { clog(1, "# BOOT: Not the expected sector size (%d!=%d).\n", boot0->bpb.byte_per_sect, 512); return false; }
 	clog(1, "# BOOT: Sector Size OK.\n");
 
+	// This seems to be a proper ibm formatted disk.
+	SetDiskType(DT_IBMPC);
+	if (Disk->GetLayoutSectors()==9) SetDiskSubType(DST_3_5DD);
+	if (Disk->GetLayoutSectors()==18) SetDiskSubType(DST_3_5HD);
+
+	if (boot0->signature!=0xaa55)
+	{
+		// probably not a pc, but an atari st disk.
+		SetDiskType(DT_ATARIST);
+
+		u16 wsum=0;
+		u16 *p16 = (u16 *)boot0;
+		for (int i=0; i<256; i++) wsum+=swap(p16[i]);
+		if (wsum==0x1234)
+		{
+			clog(1, "BOOT: This is a bootable Atari ST disk.\n");
+		}
+	}
+
 	// Listing
 	if (Config.gen_listing)
 	{
@@ -243,7 +280,7 @@ bool FormatDiskIBM::Analyze()
 	// Export
 	if (Config.gen_export)
 	{
-		char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.img", Config.fn_out);
+		char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.%s", Config.fn_out, DiskType==DT_ATARIST?"st":"img");
 		clog(1,"# Generating diskimage '%s'.\n",fnbuf);
 		if (Disk)
 		{
@@ -303,4 +340,28 @@ u32 FormatDiskIBM::cluster2sector(u32 cls)
 	u32 ssa = boot0->bpb.reserved_sectors + boot0->bpb.fat_count*boot0->bpb.sectors_per_fat + ((32*boot0->bpb.root_entries)/boot0->bpb.byte_per_sect);
 	u32 lsn = ssa+(cls-2)*boot0->bpb.sect_per_cluster;
 	return lsn;
+}
+
+char const *FormatDiskIBM::GetDiskTypeString()
+{
+	switch (DiskType)
+	{
+		case DT_IBMPC:			return "IBM/PC";
+		case DT_ATARIST:		return "Atari ST";
+		default:						return "Unknown";
+	}
+	return "Unknown";
+}
+
+char const *FormatDiskIBM::GetDiskSubTypeString()
+{
+	switch (DiskSubType)
+	{
+		case DST_3_5DD:			return "3.5\" DD";
+		case DST_3_5HD:			return "3.5\" HD";
+		case DST_5_25DD:		return "5.25\" DD";
+		case DST_5_25HD:		return "5.25\" HD";
+		default:						return "Unknown";
+	}
+	return "Unknown";
 }

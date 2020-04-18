@@ -21,6 +21,21 @@
 
 ///////////////////////////////////////////////////////////
 
+enum DiskTypes
+{
+	DT_UNKNOWN = 0,
+	DT_AMIGA,
+};
+
+enum DiskSubTypes
+{
+	DST_UNKNOWN = 0,
+	DST_3_5DD,
+	DST_3_5HD,
+};
+
+///////////////////////////////////////////////////////////
+
 #pragma pack(1)
 
 struct SectorBoot0
@@ -236,6 +251,11 @@ bool FormatDiskAmiga::Analyze()
 	char sbuf[32]; strncpy(sbuf, root->name, root->name_len);
 	clog(1,"# ANALYZE: volume label is '%s'.\n", sbuf);
 
+	// if we got this far, this probably is a proper Amiga disk
+	SetDiskType(DT_AMIGA);
+	if (Disk->GetLayoutSectors()==11) SetDiskSubType(DST_3_5DD);
+	if (Disk->GetLayoutSectors()==22) SetDiskSubType(DST_3_5HD);
+
 	// Listing
 	if (Config.gen_listing)
 	{
@@ -329,3 +349,24 @@ void FormatDiskAmiga::ParseDirectory(int fd, u32 block, char const *prefix)
 // 	}
 // 	return crc;
 // }
+
+char const *FormatDiskAmiga::GetDiskTypeString()
+{
+	switch (DiskType)
+	{
+		case DT_AMIGA:		return "Amiga";
+		default:					return "Unknown";
+	}
+	return "Unknown";
+}
+
+char const *FormatDiskAmiga::GetDiskSubTypeString()
+{
+	switch (DiskSubType)
+	{
+		case DST_3_5DD:			return "3.5\" DD";
+		case DST_3_5HD:			return "3.5\" HD";
+		default:						return "Unknown";
+	}
+	return "Unknown";
+}

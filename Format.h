@@ -34,11 +34,23 @@ public:
 	u8 GetHeads() { return LastHead+1; }
 	u8 GetSects() { return LastSect+1; }
 
+	void SetDiskType(u32 type) { DiskType=type; }
+	void SetDiskSubType(u32 subtype) { DiskSubType=subtype; }
+
+	u32 GetDiskType() { return DiskType; }
+	u32 GetDiskSubType() { return DiskSubType; }
+
+	virtual char const *GetDiskTypeString()=0;
+	virtual char const *GetDiskSubTypeString()=0;
+
 protected:
 	class VirtualDisk *Disk;
 	u8 LastCyl;
 	u8 LastHead;
 	u8 LastSect;
+
+	u32 DiskType;
+	u32 DiskSubType;
 };
 
 typedef Format *pFormat;

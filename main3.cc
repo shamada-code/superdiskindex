@@ -158,7 +158,7 @@ int main(int argc, char **argv)
 				VD->MergeRevs();
 				if (fmt->Analyze())
 				{
-					clog(1,"# Looks like an valid disk.\n");
+					clog(1,"# Looks like a valid %s, %s disk.\n", fmt->GetDiskTypeString(), fmt->GetDiskSubTypeString());
 					//VD->ExportADF("debug.adf");
 				}
 			}

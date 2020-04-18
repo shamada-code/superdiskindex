@@ -36,6 +36,9 @@ public:
 	u32 Weave16(u8 odd, u8 even);
 	u32 Weave32(u16 odd, u16 even);
 
+	virtual char const *GetDiskTypeString();
+	virtual char const *GetDiskSubTypeString();
+
 protected:
 	void ParseDirectory(int fd, u32 block, char const *prefix);
 };
