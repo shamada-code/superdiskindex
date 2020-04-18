@@ -30,6 +30,8 @@ public:
 	void InitSyncWords();
 	void AddSyncWord(u32 dw, u32 payload_length);
 
+	void SetRev(u8 currev) { CurRev=currev; }
+
 	void Feed(u8 bit);
 	void LostSync();
 	void Flush();
