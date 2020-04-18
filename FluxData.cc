@@ -157,6 +157,9 @@ void FluxData::ScanTrack(int track, int rev, BitStream *bits)
 				bits->Feed(0);
 				bits->Feed(1);
 				break;
+			default:
+				clog(1,"# ERR: Quantizer fail!\n");
+				break;
 		}
 	}
 	bits->Flush();
