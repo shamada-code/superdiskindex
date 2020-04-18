@@ -130,6 +130,7 @@ void VirtualDisk::MergeRevs()
 	FinalDisk->SetFill(Cyls*Heads*Sects*SectSize);
 
 	u32 bad_count=0;
+	u32 miss_count=0;
 	for (int c=0; c<Cyls; c++)
 	{
 		for (int h=0; h<Heads; h++)
@@ -165,6 +166,7 @@ void VirtualDisk::MergeRevs()
 						Disk.Cyls[c].Heads[h].Sectors[s].Merged.crc1ok = Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc1ok;
 						Disk.Cyls[c].Heads[h].Sectors[s].Merged.crc2ok = Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc2ok;
 						ok=true;
+						bad_count++;
 					}
 				}
 				for (int r=0; r<Revs; r++)
@@ -178,12 +180,13 @@ void VirtualDisk::MergeRevs()
 						Disk.Cyls[c].Heads[h].Sectors[s].Merged.crc1ok = Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc1ok;
 						Disk.Cyls[c].Heads[h].Sectors[s].Merged.crc2ok = Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc2ok;
 						ok=true;
+						bad_count++;
 					}
 				}
 				if (!ok)
 				{
 					clog(2,"# MISSING: No usable copy of sector %02d/%02d/%02d found.\n", c,h,s);
-					bad_count++;
+					miss_count++;
 				}
 			}
 		}
@@ -193,7 +196,10 @@ void VirtualDisk::MergeRevs()
 	{
 		clog(1,"# Final Disk has no data.\n");
 	} else {
-		clog(1,"# Final Disk has %d/%d missing or bad sectors! That's %.1f%% of the disk damaged.\n", bad_count, Cyls*Heads*Sects, (float)(100*bad_count)/(float)(Cyls*Heads*Sects));
+		clog(1,"# Final Disk has %6d sectors in total.\n", Cyls*Heads*Sects);
+		clog(1,"#                %6d are missing sectors.\n", miss_count);
+		clog(1,"#                %6d are bad sectors.\n", bad_count);
+		clog(1,"# That's %.1f%% of the disk damaged.\n", (float)(100*(bad_count+miss_count)/(float)(Cyls*Heads*Sects)));
 	}
 }
 
