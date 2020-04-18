@@ -109,6 +109,6 @@ void BitStream::Flush()
 {
 	if (SyncFlag>0)
 	{
-		Fmt->HandleBlock(Data, CurRev);
+		//Fmt->HandleBlock(Data, CurRev);
 	}
 }

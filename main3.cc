@@ -138,14 +138,15 @@ int main(int argc, char **argv)
 					rn=Config.revolution+1;
 				}
 				// scan revolution
+				BitStream *bits=NULL;
+				bits = new BitStream(fmt, 0);
+				bits->InitSyncWords();
 				for (int r=r0; r<rn; r++)
 				{
-					BitStream *bits=NULL;
-					bits = new BitStream(fmt, r);
-					bits->InitSyncWords();
+					bits->SetRev(r);
 					flux->ScanTrack(t,r, bits);
-					delete(bits); bits=NULL;
 				}
+				delete(bits); bits=NULL;
 			}
 			if (pass==0) 
 			{
