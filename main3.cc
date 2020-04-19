@@ -16,6 +16,13 @@
 #include <getopt.h>
 #include "Helpers.h"
 
+///////////////////////////////////////////////////////////
+
+u8 const VERSION_MAJOR = 0;
+u8 const VERSION_MINOR = 1;
+
+///////////////////////////////////////////////////////////
+
 void print_help()
 {
 	printf("Syntax: superdiskindex -i <infile.scp> [more options]\n");
@@ -34,11 +41,31 @@ void print_help()
 	printf("\n");
 }
 
+void print_disclaimer()
+{
+	printf("******************************************************************\n");
+	printf("*** A T T E N T I O N                                          ***\n");
+	printf("******************************************************************\n");
+	printf("*** This tool is still under development and is not final      ***\n");
+	printf("*** and certainly not bug-free.                                ***\n");
+	printf("*** Do not assume generated data (diskimages, listings, ...)   ***\n");
+	printf("*** is correct, complete or without flaws.                     ***\n");
+	printf("******************************************************************\n");
+	printf("*** So, keep your scp files archived, because a newer version  ***\n");
+	printf("*** of this tool might yield a lot better results              ***\n");
+	printf("*** than this one!                                             ***\n");
+	printf("******************************************************************\n");
+	printf("\n");
+}
+
+void print_version()
+{
+	clog(1,"SuperDiskIndex v%d.%02d\n", VERSION_MAJOR, VERSION_MINOR);
+	clog(1,"\n");
+}
+
 int main(int argc, char **argv)
 {
-	printf("SuperDiskIndex v0.01\n");
-	printf("\n");
-
 	// make sure, we're using the right data widths
 	static_assert(sizeof(u8)==1);
 	static_assert(sizeof(u16)==2);
@@ -76,12 +103,15 @@ int main(int argc, char **argv)
 		}
 	}
 
+	clog_init();
+
+	print_version();
+	if (Config.verbose>=1) print_disclaimer();
+
 	// check param compatability
 	if (strlen(Config.fn_in)==0) { printf("No input file specified (-i).\n"); print_help(); return 1; }
 	if ((Config.gen_export||Config.gen_listing||Config.gen_log)&&(strlen(Config.fn_out)==0)) { printf("Listing,Log and Export modes need output basename defined (-o).\n"); print_help(); return 1; }
 	if ((Config.gen_export||Config.gen_listing)&&(Config.track>=0)) { printf("Listing and Export modes are not working with a limited track selection.\n"); print_help(); return 1; }
-
-	clog_init();
 
 	// Initialize FluxData
 	FluxData *flux = new FluxData();
@@ -107,6 +137,7 @@ int main(int argc, char **argv)
 		VirtualDisk *VD=NULL;
 
 		Format *fmt = Formats[formatidx];
+			clog(1,"######################################################################\n");
 		clog(1,"##### Checking for '%s' Format \n", fmt->GetName());
 
 		for (int pass=0; pass<2; pass++)
