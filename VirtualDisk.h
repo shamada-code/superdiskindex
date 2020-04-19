@@ -54,6 +54,7 @@ public:
 	u8 GetLayoutCylinders() { return Cyls; }
 	u8 GetLayoutHeads() { return Heads; }
 	u8 GetLayoutSectors() { return Sects; }
+	u32 GetSectorCount() { return Cyls*Heads*Sects; }
 
 	void AddSector(u8 c, u8 h, u8 s, u8 r, void *p, u32 size, bool crc1ok, bool crc2ok);
 	void *GetSector(u8 c, u8 h, u8 s);
