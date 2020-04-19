@@ -23,7 +23,7 @@ dist_deb: clean all
 	cp tmp.deb/superdiskindex_0.2-1.deb releases/
 	rm -rf tmp.deb
 
-dist_upload: dist_deb:
+dist_upload: dist_deb
 	./upload.sh
 
 clean:
