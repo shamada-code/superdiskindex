@@ -1,0 +1,11 @@
+Package: superdiskindex
+Version: 0.2-1
+Section: base
+Priority: optional
+Architecture: amd64
+Depends: 
+Maintainer: Shamada Diundra <shamada@spritetech.com>
+Description: SuperDiskIndex
+ A tool which analyzes and converts .scp flux images into
+ .adf/.st/.img files. It can also create file listings for
+ archival.

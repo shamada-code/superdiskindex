@@ -12,6 +12,17 @@ all: folders $(TGT)
 folders:
 	mkdir -p tmp
 
+dist_deb: clean all
+	mkdir -p releases
+	mkdir -p tmp.deb/superdiskindex_0.2-1
+	cp -rv contrib/DEBIAN tmp.deb/superdiskindex_0.2-1
+	mkdir -p tmp.deb/superdiskindex_0.2-1/usr/local/bin
+	cp $(TGT) tmp.deb/superdiskindex_0.2-1/usr/local/bin/
+	cd tmp.deb && dpkg-deb --build superdiskindex_0.2-1
+	cd ..
+	cp tmp.deb/superdiskindex_0.2-1.deb releases/
+	rm -rf tmp.deb
+
 clean:
 	rm -f $(OBJS:%.o=tmp/%.o)
 	rm -f $(OBJS:%.o=tmp/%.d)
