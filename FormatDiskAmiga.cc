@@ -233,7 +233,7 @@ bool FormatDiskAmiga::Analyze()
 	}
 
 	u32 rootblkidx = swap(boot0->rootblock);
-	if ((rootblkidx==0)||(rootblkidx>(Disk->GetLayoutCylinders()*Disk->GetLayoutHeads()*Disk->GetLayoutSectors())))
+	if ((rootblkidx==0)||(rootblkidx>Disk->GetSectorCount()))
 	{
 		clog(2, "# Warning: Rootblock setting in Bootblock is bad. Using default location for root block.\n");
 		if (Disk->GetLayoutSectors()==11) rootblkidx=880; // DD Disk
@@ -263,9 +263,9 @@ bool FormatDiskAmiga::Analyze()
 		clog(1,"# Generating file listing '%s'.\n",fnbuf);
 
 		u16 rootblk = swap(boot0->rootblock);
-		if ((rootblk==0)||(rootblk>=(Disk->GetLayoutCylinders()*Disk->GetLayoutHeads()*Disk->GetLayoutSectors()))) 
+		if ((rootblk==0)||(rootblk>=Disk->GetSectorCount())) 
 		{
-			rootblk = (Disk->GetLayoutCylinders()*Disk->GetLayoutHeads()*Disk->GetLayoutSectors())>>1;
+			rootblk = Disk->GetSectorCount()>>1;
 		}
 		clog(2,"# Loading rootblock @ %d.\n",rootblk);
 
