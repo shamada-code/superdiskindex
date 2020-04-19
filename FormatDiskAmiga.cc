@@ -262,6 +262,13 @@ bool FormatDiskAmiga::Analyze()
 		char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.lst", Config.fn_out);
 		clog(1,"# Generating file listing '%s'.\n",fnbuf);
 
+		u16 rootblk = swap(boot0->rootblock);
+		if ((rootblk==0)||(rootblk>=(Disk->GetLayoutCylinders()*Disk->GetLayoutHeads()*Disk->GetLayoutSectors()))) 
+		{
+			rootblk = (Disk->GetLayoutCylinders()*Disk->GetLayoutHeads()*Disk->GetLayoutSectors())>>1;
+		}
+		clog(2,"# Loading rootblock @ %d.\n",rootblk);
+
 		int fd = open(fnbuf, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
 		if (fd>=0)
 		{
@@ -269,7 +276,7 @@ bool FormatDiskAmiga::Analyze()
 			dprintf(fd, "\n");
 			dprintf(fd, "%-60s Type    Size  Blk  UID  GID\n", "Filename");
 			dprintf(fd, "-----------------------------------------------------------------------------------------\n");
-			ParseDirectory(fd, swap(boot0->rootblock),"/");
+			ParseDirectory(fd, rootblk,"/");
 		}
 		close(fd);
 	}
@@ -317,6 +324,7 @@ void FormatDiskAmiga::ParseDirectory(int fd, u32 block, char const *prefix)
 		u32 blk = swap(base->data_blocks[i]);
 		if (blk>0)
 		{
+			clog(2,"# Loading fileheader @ %d.\n",blk);
 			SectorFileHead *filehead = (SectorFileHead *)Disk->GetSector(blk);
 			//hexdump(filehead, 512);
 			char sbuf[30]; 
