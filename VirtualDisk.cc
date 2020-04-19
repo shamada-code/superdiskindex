@@ -215,13 +215,3 @@ void VirtualDisk::ExportIMG(char const *fn)
 	// same format as adf
 	ExportADF(fn);
 }
-
-void VirtualDisk::ExportListing(char const *fn)
-{
-
-}
-
-void VirtualDisk::ExportState(char const *fn)
-{
-
-}

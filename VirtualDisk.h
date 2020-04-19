@@ -64,8 +64,6 @@ public:
 
 	void ExportADF(char const *fn);
 	void ExportIMG(char const *fn);
-	void ExportListing(char const *fn);
-	void ExportState(char const *fn);
 
 protected:
 	u32 chs2blk(int c, int h, int s) { return c*Heads*Sects+h*Sects+s; }
