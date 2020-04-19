@@ -182,7 +182,7 @@ void FormatDiskIBM::HandleBlock(Buffer *buffer, int currev)
 		clog(2,"# Sector Data + %04x (%s)\n", (db[2+512+0]<<8)|db[2+512+1], crc.Check()?"OK":"BAD");
 		if ((cur_c<0)||(cur_h<0)||(cur_s<0))
 		{
-			clog(1, "# WARN: Found sector data block without valid sector header!\n");
+			clog(2, "# WARN: Found sector data block without valid sector header!\n");
 		} else {
 			// process
 			if (Config.verbose>=3) hexdump(db+2, buffer->GetFill()-4);
