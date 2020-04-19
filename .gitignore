@@ -11,3 +11,6 @@ testing/
 
 # vscode files
 settings.json
+
+# local config
+upload.sh
