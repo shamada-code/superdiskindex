@@ -322,7 +322,7 @@ void FormatDiskAmiga::ParseDirectory(int fd, u32 block, char const *prefix)
 	for (u32 i=0; i<countof(base->data_blocks); i++)
 	{
 		u32 blk = swap(base->data_blocks[i]);
-		if (blk>0)
+		while ((blk>0)&&(blk<Disk->GetSectorCount()))
 		{
 			clog(2,"# Loading fileheader @ %d.\n",blk);
 			SectorFileHead *filehead = (SectorFileHead *)Disk->GetSector(blk);
@@ -344,6 +344,9 @@ void FormatDiskAmiga::ParseDirectory(int fd, u32 block, char const *prefix)
 			{
 				ParseDirectory(fd, blk, sbuf2);
 			}
+
+			blk=swap(filehead->next_hash);
+			if (blk>0) clog(2, "# following hash_chain to blk @ %d\n", blk);
 		}
 	}
 }
