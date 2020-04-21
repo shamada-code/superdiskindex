@@ -9,3 +9,12 @@
 
 #pragma once
 
+class DiskMap
+{
+public:
+	DiskMap();
+	virtual ~DiskMap();
+
+protected:
+
+};

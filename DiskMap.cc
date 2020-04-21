@@ -9,3 +9,15 @@
 
 #include "Global.h"
 #include "DiskMap.h"
+
+///////////////////////////////////////////////////////////
+
+DiskMap::DiskMap()
+{
+
+}
+
+DiskMap::~DiskMap()
+{
+
+}
