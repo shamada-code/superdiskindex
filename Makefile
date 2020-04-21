@@ -1,6 +1,6 @@
 
 TGT=superdiskindex
-OBJS=main3.o 
+OBJS=main.o 
 OBJS+=BitStream.o Buffer.o Config.o CRC.o DiskMap.o FluxData.o
 OBJS+=Format.o FormatDiskIBM.o FormatDiskAmiga.o
 OBJS+=MFM.o Helpers.o VirtualDisk.o
