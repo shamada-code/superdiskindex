@@ -1,4 +1,7 @@
 
+VERSION1D=$(shell cat VERSION_L0).$(shell cat VERSION_L1)
+VERSION2D=$(shell cat VERSION_L0).$(shell printf "%02d" `cat VERSION_L1`)
+
 TGT=superdiskindex
 OBJS=main.o 
 OBJS+=BitStream.o Buffer.o Config.o CRC.o DiskMap.o FluxData.o
@@ -14,13 +17,13 @@ folders:
 
 dist_deb: clean all
 	mkdir -p releases
-	mkdir -p tmp.deb/superdiskindex_0.2-1
-	cp -rv contrib/DEBIAN tmp.deb/superdiskindex_0.2-1
-	mkdir -p tmp.deb/superdiskindex_0.2-1/usr/local/bin
-	cp $(TGT) tmp.deb/superdiskindex_0.2-1/usr/local/bin/
-	cd tmp.deb && dpkg-deb --build superdiskindex_0.2-1
+	mkdir -p tmp.deb/superdiskindex_$(VERSION1D)-1/DEBIAN
+	cat contrib/DEBIAN/control | sed "s/@@V@@/$(VERSION1D)/" > tmp.deb/superdiskindex_$(VERSION1D)-1/DEBIAN/control
+	mkdir -p tmp.deb/superdiskindex_$(VERSION1D)-1/usr/local/bin
+	cp $(TGT) tmp.deb/superdiskindex_$(VERSION1D)-1/usr/local/bin/
+	cd tmp.deb && dpkg-deb --build superdiskindex_$(VERSION1D)-1
 	cd ..
-	cp tmp.deb/superdiskindex_0.2-1.deb releases/
+	cp tmp.deb/superdiskindex_$(VERSION1D)-1.deb releases/
 	rm -rf tmp.deb
 
 dist_upload: dist_deb
@@ -35,6 +38,6 @@ $(TGT): $(OBJS:%.o=tmp/%.o)
 	$(CXX) -o $@ $(OBJS:%.o=tmp/%.o)
 
 tmp/%.o: %.cc Makefile
-	$(CXX) -MMD -Wall -O3 -o $@ -c $<
+	$(CXX) -MMD -Wall -O3 -D_TOOLVERSION=$(VERSION2D) -o $@ -c $<
 
 -include $(OBJS:%.o=tmp/%.d)

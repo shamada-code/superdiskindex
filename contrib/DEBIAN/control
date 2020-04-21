@@ -1,5 +1,5 @@
 Package: superdiskindex
-Version: 0.2-1
+Version: @@V@@-1
 Section: base
 Priority: optional
 Architecture: amd64

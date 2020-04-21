@@ -18,8 +18,13 @@
 
 ///////////////////////////////////////////////////////////
 
-u8 const VERSION_MAJOR = 0;
-u8 const VERSION_MINOR = 2;
+#ifndef _TOOLVERSION
+	#define _TOOLVERSION :unknown
+#endif
+
+#define TOOLVERSIONSTR1(val) #val
+#define TOOLVERSIONSTR0(val) TOOLVERSIONSTR1(val)
+#define TOOLVERSION TOOLVERSIONSTR0(_TOOLVERSION)
 
 ///////////////////////////////////////////////////////////
 
@@ -60,7 +65,7 @@ void print_disclaimer()
 
 void print_version()
 {
-	clog(1,"SuperDiskIndex v%d.%02d\n", VERSION_MAJOR, VERSION_MINOR);
+	clog(1,"SuperDiskIndex v%s\n", TOOLVERSION);
 	clog(1,"\n");
 }
 
