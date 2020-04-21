@@ -39,10 +39,12 @@ void print_help()
 	printf("     --listing             | Generate file listing to file <basename>.lst\n");
 	printf("     --export              | Generate disk image <basename>.{adf,img}\n");
 	printf("     --log                 | Generate logfile <basename>.log\n");
+	printf("  -a,--archive             | shortcut for --listing,--export and --log\n");
 	printf("     --format-any          | Test for any known formats (default)\n");
 	printf("     --format-amiga        | Test only for amiga format\n");
 	printf("     --format-ibm          | Test only for ibm pc/atari format\n");
 	printf("  -v                       | Increase verbosity (can be applied more than once)\n");
+	printf("  -q,--quiet               | Set verbosity to minimum level\n");
 	printf("\n");
 }
 
@@ -87,6 +89,9 @@ int main(int argc, char **argv)
 		{"export", 0, NULL, 'e' },
 		{"log", 0, NULL, 'g' },
 		{"help", 0, NULL, 'h' },
+		{"verbose", 0, NULL, 'v' },
+		{"quiet", 0, NULL, 'q' },
+		{"archive", 0, NULL, 'a' },
 		{"format-any", 0, &Config.format, FMT_ANY },
 		{"format-amiga", 0, &Config.format, FMT_AMIGA },
 		{"format-ibm", 0, &Config.format, FMT_IBM },
@@ -94,16 +99,18 @@ int main(int argc, char **argv)
 	};
 	int ret = 0;
 	while (ret>=0) {
-		ret = getopt_long(argc, argv, "i:o:t:r:vleh?", longopts, NULL);
+		ret = getopt_long(argc, argv, "i:o:t:r:vqleh?", longopts, NULL);
 		if (ret>=0) {
 			if (ret=='i') strcpy(Config.fn_in, optarg);
 			if (ret=='o') strcpy(Config.fn_out, optarg);
 			if (ret=='t') Config.track = atoi(optarg);
 			if (ret=='r') Config.revolution = atoi(optarg);
 			if (ret=='v') Config.verbose++;
+			if (ret=='q') Config.verbose=0;
 			if (ret=='l') Config.gen_listing=true;
 			if (ret=='e') Config.gen_export=true;
 			if (ret=='g') Config.gen_log=true;
+			if (ret=='a') { Config.gen_listing=true; Config.gen_export=true; Config.gen_log=true; }
 			if ((ret=='h')||(ret=='?')) { print_help(); return 1; }
 		}
 	}
@@ -194,7 +201,7 @@ int main(int argc, char **argv)
 				VD->MergeRevs();
 				if (fmt->Analyze())
 				{
-					clog(1,"# Looks like a valid %s, %s disk.\n", fmt->GetDiskTypeString(), fmt->GetDiskSubTypeString());
+					clog(0,"# '%s' looks like a valid %s, %s disk.\n", Config.fn_in, fmt->GetDiskTypeString(), fmt->GetDiskSubTypeString());
 					//VD->ExportADF("debug.adf");
 				}
 			}
