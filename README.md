@@ -8,10 +8,14 @@ SuperDiskIndex is a tool that reads scp files (as created by greaseweazle) and
 analyzes them for disk type, size and state and exports the appropriate image
 file (adf,img,...), as well as file listings, blockmaps, checkdisk results.
 
-Requirements
-------------
+Requirements (Building from source)
+-----------------------------------
 *  gcc/g++
 *  make
+
+Requirements (Running the binary)
+---------------------------------
+* none
 
 Platforms
 ---------
@@ -29,5 +33,5 @@ Supported Formats
 Known Bugs
 ----------
 
-Too many to count ;-)
+Too many to count ;-) This is still in the experimental phase.
 
