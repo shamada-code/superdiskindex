@@ -33,7 +33,7 @@ void print_help()
 	printf("Syntax: superdiskindex -i <infile.scp> [more options]\n");
 	printf("Options:\n");
 	printf("  -i,--in <filename.scp>   | Input filename (scp file format)\n");
-	printf("  -o,--out <basename>      | Input filename (scp file format)\n");
+	printf("  -o,--out <basename>      | Output basename (without extension)\n");
 	printf("  -t,--track <tracknum>    | Only analyze track <tracknum>\n");
 	printf("  -r,--rev <revnum>        | Only use revolution <revnum>\n");
 	printf("     --listing             | Generate file listing to file <basename>.lst\n");
