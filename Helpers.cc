@@ -25,7 +25,11 @@ void hexdump(void *dataptr, u32 len)
 	if ((len%16)>0) o=1;
 	for (u32 i=0; i<(len>>4)+o; i++)
 	{
+		#if DEBUG_HEXDUMP
+		clog(0,"%08x  |  %02x %02x %02x %02x %02x %02x %02x %02x  %02x %02x %02x %02x %02x %02x %02x %02x  | %c%c%c%c%c%c%c%c %c%c%c%c%c%c%c%c\n",
+		#else
 		clog(3,"%08x  |  %02x %02x %02x %02x %02x %02x %02x %02x  %02x %02x %02x %02x %02x %02x %02x %02x  | %c%c%c%c%c%c%c%c %c%c%c%c%c%c%c%c\n",
+		#endif
 			i*0x10,
 			(i*0x10+0x0<len)?data[i*0x10+0x0]:0,
 			(i*0x10+0x1<len)?data[i*0x10+0x1]:0,

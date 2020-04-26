@@ -16,3 +16,5 @@
 #include <memory.h>
 #include "Types.h"
 #include "Config.h"
+
+#define DEBUG_HEXDUMP 0
