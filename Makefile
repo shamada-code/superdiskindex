@@ -15,6 +15,9 @@ all: folders $(TGT)
 folders:
 	mkdir -p tmp
 
+install: all
+	install -D --mode=755 --preserve-timestamps --strip $(TGT) /usr/local/bin/$(TGT)
+
 dist_deb: clean all
 	mkdir -p releases
 	mkdir -p tmp.deb/superdiskindex_$(VERSION1D)-1/DEBIAN
