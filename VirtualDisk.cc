@@ -25,6 +25,8 @@ VirtualDisk::VirtualDisk()
 	Sects=0;
 	Revs=0;
 	SectSize=0;
+	SectorsMissing=0;
+	SectorsCRCBad=0;
 }
 
 VirtualDisk::~VirtualDisk()
@@ -116,6 +118,18 @@ void *VirtualDisk::GetSector(u16 blk)
 	return FinalDisk->GetBuffer()+blk*SectSize;
 }
 
+bool VirtualDisk::IsSectorMissing(u16 blk)
+{
+	return Disk.Cyls[blk2cyl(blk)].Heads[blk2head(blk)].Sectors[blk2sect(blk)].Merged.used==false;
+}
+
+bool VirtualDisk::IsSectorCRCBad(u16 blk)
+{
+	return (
+		(Disk.Cyls[blk2cyl(blk)].Heads[blk2head(blk)].Sectors[blk2sect(blk)].Merged.crc1ok==false) ||
+		(Disk.Cyls[blk2cyl(blk)].Heads[blk2head(blk)].Sectors[blk2sect(blk)].Merged.crc2ok==false) );
+}
+
 void VirtualDisk::MergeRevs()
 {
 	clog(1, "# Merging sector copies.\n");
@@ -129,8 +143,6 @@ void VirtualDisk::MergeRevs()
 	FinalDisk->Alloc(Cyls*Heads*Sects*SectSize);
 	FinalDisk->SetFill(Cyls*Heads*Sects*SectSize);
 
-	u32 bad_count=0;
-	u32 miss_count=0;
 	for (int c=0; c<Cyls; c++)
 	{
 		for (int h=0; h<Heads; h++)
@@ -166,7 +178,7 @@ void VirtualDisk::MergeRevs()
 						Disk.Cyls[c].Heads[h].Sectors[s].Merged.crc1ok = Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc1ok;
 						Disk.Cyls[c].Heads[h].Sectors[s].Merged.crc2ok = Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc2ok;
 						ok=true;
-						bad_count++;
+						SectorsCRCBad++;
 					}
 				}
 				for (int r=0; r<Revs; r++)
@@ -180,13 +192,13 @@ void VirtualDisk::MergeRevs()
 						Disk.Cyls[c].Heads[h].Sectors[s].Merged.crc1ok = Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc1ok;
 						Disk.Cyls[c].Heads[h].Sectors[s].Merged.crc2ok = Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc2ok;
 						ok=true;
-						bad_count++;
+						SectorsCRCBad++;
 					}
 				}
 				if (!ok)
 				{
 					clog(2,"# MISSING: No usable copy of sector %02d/%02d/%02d found.\n", c,h,s);
-					miss_count++;
+					SectorsMissing++;
 				}
 			}
 		}
@@ -197,9 +209,9 @@ void VirtualDisk::MergeRevs()
 		clog(1,"# Final Disk has no data.\n");
 	} else {
 		clog(1,"# Final Disk has %6d sectors in total.\n", Cyls*Heads*Sects);
-		clog(1,"#                %6d are missing sectors.\n", miss_count);
-		clog(1,"#                %6d are bad sectors.\n", bad_count);
-		clog(1,"# That's %.1f%% of the disk damaged.\n", (float)(100*(bad_count+miss_count)/(float)(Cyls*Heads*Sects)));
+		clog(1,"#                %6d are missing sectors.\n", SectorsMissing);
+		clog(1,"#                %6d are bad sectors.\n", SectorsCRCBad);
+		clog(1,"# That's %.1f%% of the disk damaged.\n", (float)(100*(SectorsCRCBad+SectorsMissing)/(float)(Cyls*Heads*Sects)));
 	}
 }
 

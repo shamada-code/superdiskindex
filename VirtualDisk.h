@@ -59,6 +59,10 @@ public:
 	void AddSector(u8 c, u8 h, u8 s, u8 r, void *p, u32 size, bool crc1ok, bool crc2ok);
 	void *GetSector(u8 c, u8 h, u8 s);
 	void *GetSector(u16 blk);
+	bool IsSectorMissing(u16 blk);
+	bool IsSectorCRCBad(u16 blk);
+	u32 GetMissingCount() { return SectorsMissing; }
+	u32 GetCRCBadCount() { return SectorsCRCBad; }
 
 	void MergeRevs();
 
@@ -79,4 +83,7 @@ protected:
 
 	VDDisk Disk;
 	class Buffer *FinalDisk;
+
+	u32 SectorsMissing;
+	u32 SectorsCRCBad;
 };
