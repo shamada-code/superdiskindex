@@ -16,6 +16,7 @@ ToDo
 * add sector map output
 * add filesystem checks
 * add custom formatting options for output basename
+* add make install to makefile
 
 WishList
 --------
