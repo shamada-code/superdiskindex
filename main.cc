@@ -39,6 +39,7 @@ void print_help()
 	printf("     --listing             | Generate file listing to file <basename>.lst\n");
 	printf("     --export              | Generate disk image <basename>.{adf,img}\n");
 	printf("     --log                 | Generate logfile <basename>.log\n");
+	printf("     --maps                | Generate maps file <basename>.maps\n");
 	printf("  -a,--archive             | shortcut for --listing,--export and --log\n");
 	printf("     --format-any          | Test for any known formats (default)\n");
 	printf("     --format-amiga        | Test only for amiga format\n");
@@ -88,6 +89,7 @@ int main(int argc, char **argv)
 		{"listing", 0, NULL, 'l' },
 		{"export", 0, NULL, 'e' },
 		{"log", 0, NULL, 'g' },
+		{"maps", 0, NULL, 'm' },
 		{"help", 0, NULL, 'h' },
 		{"verbose", 0, NULL, 'v' },
 		{"quiet", 0, NULL, 'q' },
@@ -110,7 +112,8 @@ int main(int argc, char **argv)
 			if (ret=='l') Config.gen_listing=true;
 			if (ret=='e') Config.gen_export=true;
 			if (ret=='g') Config.gen_log=true;
-			if (ret=='a') { Config.gen_listing=true; Config.gen_export=true; Config.gen_log=true; }
+			if (ret=='m') Config.gen_maps=true;
+			if (ret=='a') { Config.gen_listing=true; Config.gen_export=true; Config.gen_log=true; Config.gen_maps=true; }
 			if ((ret=='h')||(ret=='?')) { print_help(); return 1; }
 		}
 	}

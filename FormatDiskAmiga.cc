@@ -18,6 +18,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "CRC.h"
+#include "DiskMap.h"
 
 ///////////////////////////////////////////////////////////
 
@@ -256,29 +257,95 @@ bool FormatDiskAmiga::Analyze()
 	if (Disk->GetLayoutSectors()==11) SetDiskSubType(DST_3_5DD);
 	if (Disk->GetLayoutSectors()==22) SetDiskSubType(DST_3_5HD);
 
-	// Listing
-	if (Config.gen_listing)
+	// Initialize DiskMap
 	{
-		char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.lst", Config.fn_out);
-		clog(1,"# Generating file listing '%s'.\n",fnbuf);
-
-		u16 rootblk = swap(boot0->rootblock);
-		if ((rootblk==0)||(rootblk>=Disk->GetSectorCount())) 
+		DMap = new DiskMap(Disk->GetSectorCount());
+		DMap->SetBitsSector(0, DMF_BOOTBLOCK);
+		DMap->SetBitsSector(rootblkidx, DMF_ROOTBLOCK);
+		clog(2, "# Bitmap settings: Ext=%d, Flag=%d, Pages=%d,%d,%d,...\n", swap(root->bm_ext), swap(root->bm_flag), swap(root->bm_pages[0]), swap(root->bm_pages[1]), swap(root->bm_pages[2]));
+		for (u32 i=0; i<countof(root->bm_pages); i++)
 		{
-			rootblk = Disk->GetSectorCount()>>1;
+			if (swap(root->bm_pages[i])>0)
+			{
+				DMap->SetBitsSector(swap(root->bm_pages[i]), DMF_BLOCKMAP);
+			}
 		}
-		clog(2,"# Loading rootblock @ %d.\n",rootblk);
+		for (int i=0; i<Disk->GetSectorCount(); i++)
+		{
+			if (Disk->IsSectorMissing(i)) DMap->SetBitsSector(i, DMF_MISSING);
+			if (Disk->IsSectorCRCBad(i)) DMap->SetBitsSector(i, DMF_CRC_LOWLEVEL_BAD);
+		}
+	}
 
-		int fd = open(fnbuf, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
-		if (fd>=0)
+	// Listing
+	{
+		int fd=-1;
+		clog(2,"# Loading rootblock @ %d.\n",rootblkidx);
+
+		if (Config.gen_listing)
+		{
+			char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.lst", Config.fn_out);
+			clog(1,"# Generating file listing '%s'.\n",fnbuf);
+			fd = open(fnbuf, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
+		}
+		if ((Config.gen_listing)&&(fd>=0))
 		{
 			dprintf(fd, "Volume: %s\n", sbuf);
 			dprintf(fd, "\n");
 			dprintf(fd, "%-60s Type    Size  Blk  UID  GID\n", "Filename");
 			dprintf(fd, "-----------------------------------------------------------------------------------------\n");
-			ParseDirectory(fd, rootblk,"/");
 		}
-		close(fd);
+		ParseDirectory(fd, rootblkidx,"/");
+		if ((Config.gen_listing)&&(fd>=0))
+		{
+			close(fd);
+		}
+	}
+
+	// compare DiskMap with on-disk blockmap
+	{
+		u32 blkmapidx = swap(root->bm_pages[0]);
+		u32 *blkmap = (u32 *)Disk->GetSector(blkmapidx);
+		//clog(1, "BLOCKMAP:\n# %04d |   ", 0);
+		bool blkmapmatch=true;
+		for (int i=0; i<Disk->GetSectorCount()/32; i++)
+		{
+			u32 bmval = swap(blkmap[i+1]);
+			for (int j=0; j<32; j++)
+			{
+				//clog(1, "%c", bmval&(1<<j)?'.':'+');
+				//if ((i*32+j+2)%128==127) clog(1, "\n# %04d | ", (i+1)*32);
+				u32 sectidx = i*32+j+2;
+				if (sectidx<Disk->GetSectorCount())
+				{
+					u8 sect_free = ((bmval&(1<<j))>0);
+					if ( (sect_free) && (DMap->GetSector(sectidx, DMF_CONTENT_MASK)>0) )
+					{
+						clog(1,"# WARNING: BlockMap mismatch - Sector %d is marked free, but belongs to a file/directory!\n", sectidx);
+						blkmapmatch=false;
+					}
+					if ( (!sect_free) && (DMap->GetSector(sectidx, DMF_CONTENT_MASK)==0) )
+					{
+						clog(1,"# WARNING: BlockMap mismatch - Sector %d is marked used, but doesn't belong to a file/directory!\n", sectidx);
+						blkmapmatch=false;
+					}
+				}
+			}
+		}
+		if (blkmapmatch) clog(1, "# Blockmap matches scanned files/directories on disk.\n");
+	}
+
+	// Output DiskMaps
+	{
+		if (Config.gen_maps)
+		{
+			char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.maps", Config.fn_out);
+			clog(1,"# Generating block/usage/healthmaps '%s'.\n",fnbuf);
+			if (DMap)
+			{
+				DMap->OutputMaps(fnbuf);
+			}
+		}
 	}
 
 	// Export
@@ -336,13 +403,21 @@ void FormatDiskAmiga::ParseDirectory(int fd, u32 block, char const *prefix)
 			char sectype='?';
 			switch (swap(filehead->sec_type))
 			{
-				case -3: sectype='F'; break;
-				case 2: sectype='D'; break;
+				case -3: sectype='F'; DMap->SetBitsSector(blk, DMF_FILEHEADER); break;
+				case 2: sectype='D'; DMap->SetBitsSector(blk, DMF_DIRECTORY); break;
 			}
-			dprintf(fd, "%-60s [%c] %8d %04d %4d %4d\n", sbuf2,sectype,swap(filehead->size), blk, swap(filehead->uid), swap(filehead->gid));
+			//clog(1, "dmap setting blk %04d to %c\n", blk, sectype);
+			if ((Config.gen_listing)&&(fd>=0))
+			{
+				dprintf(fd, "%-60s [%c] %8d %04d %4d %4d\n", sbuf2,sectype,swap(filehead->size), blk, swap(filehead->uid), swap(filehead->gid));
+			}
 			if (swap(filehead->sec_type)==2)
 			{
 				ParseDirectory(fd, blk, sbuf2);
+			}
+			if (swap(filehead->sec_type)==-3)
+			{
+				ScanFile(blk);
 			}
 
 			blk=swap(filehead->next_hash);
@@ -380,4 +455,39 @@ char const *FormatDiskAmiga::GetDiskSubTypeString()
 		default:						return "Unknown";
 	}
 	return "Unknown";
+}
+
+void FormatDiskAmiga::ScanFile(u32 block)
+{
+	SectorFileHead *base = (SectorFileHead *)Disk->GetSector(block);
+	char sbuf[30]; 
+	memset(sbuf, 0, sizeof(sbuf)); 
+	strncpy(sbuf, base->name, base->name_len);
+	clog(2, "scanning file %04d with name '%s'\n", block, sbuf);
+
+	clog(2, "blocks: ");
+	for (u32 i=0; i<countof(base->data_blocks); i++)
+	{
+		u32 datablk = swap(base->data_blocks[i]);
+		if (datablk>0)
+		{
+			clog(2, "%d, ", datablk);
+			DMap->SetBitsSector(datablk, DMF_DATA);
+			//u32 blk = swap(base->data_blocks[i]);
+			//while ((blk>0)&&(blk<Disk->GetSectorCount()))
+			//{
+			//}
+			if (DMap->GetSector(datablk, DMF_HEALTH_MASK)>0)
+			{
+				clog(1, "# Bad sector %04d found (belongs to file '%s')\n", block, sbuf);
+			}
+		}
+	}
+	u32 ext = swap(base->extension);
+	if (ext>0)
+	{
+		DMap->SetBitsSector(ext, DMF_FILEHEADER);
+		ScanFile(ext);
+	}
+	clog(2, "\n");
 }

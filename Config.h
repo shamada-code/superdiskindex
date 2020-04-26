@@ -19,6 +19,7 @@ struct config_t
 	int gen_listing;
 	int gen_export;
 	int gen_log;
+	int gen_maps;
 	int format;
 };
 

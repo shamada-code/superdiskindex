@@ -41,4 +41,6 @@ public:
 
 protected:
 	void ParseDirectory(int fd, u32 block, char const *prefix);
+	void ScanFile(u32 block);
+	class DiskMap *DMap;
 };
