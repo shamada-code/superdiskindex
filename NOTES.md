@@ -13,10 +13,10 @@ ToDo
 * ~~extend ibm format code with functions already working in amiga mode~~
 * follow fat chain for subdirs
 * ~~add atari boot block checksum~~
-* add sector map output
-* add filesystem checks
+* ~~add sector map output~~
+* ~~add filesystem checks~~
 * add custom formatting options for output basename
-* add make install to makefile
+* ~~add make install to makefile~~
 
 WishList
 --------
