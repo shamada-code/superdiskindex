@@ -20,5 +20,6 @@ config_t Config =
     false, // listing
     false, // export
     false, // log
+    false, // maps
     FMT_ANY // format
 };
