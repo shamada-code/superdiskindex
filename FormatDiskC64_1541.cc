@@ -191,6 +191,10 @@ bool FormatDiskC64_1541::Analyze()
 		{
 			u8 freesect = sys->bam[i]&0xff;
 			u32 mapbits = sys->bam[i]>>8;
+			// count set bits
+			u8 setbits = 0;
+			for (int j=0; j<24; j++) setbits+=((mapbits>>j)&1);
+			if (freesect!=setbits) clog(2, "# BAM: Track %d has %d blocks marked free, but reports %d free blocks.\n", i, setbits, freesect);
 			for (int j=0; j<DLayout->GetTrackLen(i); j++)
 			{
 				DMap->SetBitsSector(DLayout->CHStoBLK(i,0, j), (mapbits&(0x1<<j))>0?0:DMF_BLOCK_USED);
