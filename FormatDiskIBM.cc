@@ -388,7 +388,8 @@ void FormatDiskIBM::ParseDirectory(int fd, u32 block, u32 blkcount, char const *
 			{
 				//clog(1, "# --lfn entry--\n");
 			} else {
-				if ((rootdir[i].name[0]>0x00) && !((rootdir[i].name[0]==0xe5)&&(rootdir[i].first_cluster==0)))
+				u8 etype = (u8)(rootdir[i].name[0]);
+				if ((etype>0x00) && !((etype==0xe5)&&(rootdir[i].first_cluster==0)))
 				{
 					char sbuf0[8+1]; memcpy(sbuf0, rootdir[i].name, 8); sbuf0[8]=0; for (int si=7; si>=0; si--) if (sbuf0[si]==0x20) sbuf0[si]=0;
 					char sbuf1[3+1]; memcpy(sbuf1, rootdir[i].ext, 3); sbuf1[3]=0; for (int si=2; si>=0; si--) if (sbuf1[si]==0x20) sbuf1[si]=0;
@@ -404,7 +405,7 @@ void FormatDiskIBM::ParseDirectory(int fd, u32 block, u32 blkcount, char const *
 							(rootdir[i].attrs&DEA_SYS)?'S':'.',
 							(rootdir[i].attrs&DEA_ARC)?'A':'.',
 							(rootdir[i].attrs&DEA_HID)?'H':'.',
-							rootdir[i].name[0]==0xe5?"<DELETED>":""
+							etype==0xe5?"<DELETED>":""
 							);
 					}
 					if (
