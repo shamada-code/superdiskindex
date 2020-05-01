@@ -16,13 +16,3 @@
 #include "VirtualDisk.h"
 
 ///////////////////////////////////////////////////////////
-
-// bool Format::Detect()
-// {
-// 	return false;
-// }
-
-void Format::HandleBlock(class Buffer *buffer, int currev)
-{
-
-}
