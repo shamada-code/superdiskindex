@@ -11,6 +11,7 @@
 #include "Buffer.h"
 #include "Helpers.h"
 #include "MFM.h"
+#include "GCR.h"
 
 ///////////////////////////////////////////////////////////
 
@@ -84,4 +85,61 @@ void Buffer::MFMDecode()
 		p8[i] = mfm_decode(swap16(p16[i]));
 	}
 	Fill = Fill/2;
+}
+
+void Buffer::GCRDecode(u32 byteoffset, u8 bitoffset)
+{
+	Buffer b2;
+	b2.Alloc(Size);
+	u8 *p8 = ((u8 *)Data)+byteoffset;
+	u8 p8bit = bitoffset;
+	u8 *tgt = (u8 *)b2.Data;
+	u8 tgtbit = 0;
+
+	while (p8<(((u8 *)Data)+Fill))
+	{
+		// mask and get first part
+		u8 bc1 = minval(5,8-p8bit);
+		u8 mask1 = (0xff>>(8-bc1));
+		u8 part1 = (*p8)>>((8-bc1)-p8bit);
+
+		// advance pointer, if required
+		p8bit+=bc1;
+		if (p8bit>=8)
+		{
+			p8bit-=8;
+			p8++;
+		}
+
+		// mask and get second part
+		u8 bc2 = 5-bc1;
+		u8 mask2 = (0xff>>(8-bc2));
+		u8 part2 = (*p8)>>((8-bc2)-p8bit);
+
+		// advance pointer, if required
+		p8bit+=bc2;
+		if (p8bit>=8)
+		{
+			p8bit-=8;
+			p8++;
+		}
+
+		// merge parts and decode value
+		u8 gcr_val = ((part1&mask1)<<bc2) | (part2&mask2);
+		u8 dec_val = gcr_cbm_decode(gcr_val);
+		//clog(3, "#GCR(%02x&%02x + %02x&%02x = %02x) = %02x\n", part1, mask1, part2, mask2, gcr_val, dec_val);
+
+		// store decoded value
+		(*tgt) = ((*tgt)&(0xf<<(tgtbit))) | (dec_val<<(4-tgtbit));
+		tgtbit+=4;
+		if (tgtbit>=8)
+		{
+			tgtbit-=8;
+			tgt++;
+		}
+	}
+
+	u32 decsize = tgt-(u8 *)b2.Data;
+	memcpy(Data, b2.Data, decsize);
+	Fill = decsize;
 }

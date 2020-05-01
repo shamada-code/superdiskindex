@@ -43,6 +43,7 @@ public:
 	u64 GetFill() { return Fill; }
 
 	void MFMDecode();
+	void GCRDecode(u32 byteoffset=0, u8 bitoffset=0);
 
 protected:
 	void RequireSize(u64 size);
