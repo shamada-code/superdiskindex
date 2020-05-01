@@ -15,6 +15,7 @@
 #include "VirtualDisk.h"
 #include <getopt.h>
 #include "Helpers.h"
+#include "JsonState.h"
 
 ///////////////////////////////////////////////////////////
 

@@ -20,6 +20,7 @@ struct config_t
 	int gen_export;
 	int gen_log;
 	int gen_maps;
+	int gen_json;
 	int format;
 };
 

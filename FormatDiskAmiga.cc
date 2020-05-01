@@ -19,6 +19,7 @@
 #include <sys/stat.h>
 #include "CRC.h"
 #include "DiskMap.h"
+#include "JsonState.h"
 
 ///////////////////////////////////////////////////////////
 
@@ -225,6 +226,18 @@ void FormatDiskAmiga::HandleBlock(Buffer *buffer, int currev)
 
 bool FormatDiskAmiga::Analyze()
 {
+	// create new JsonState
+	if (0) {
+		JS = new JsonState;
+
+		JS->Set("disk.debug", "test");
+
+		JS->Set("disk.layout.tracks", "%d", Disk->GetLayoutCylinders());
+		JS->Set("disk.layout.heads", "%d", Disk->GetLayoutHeads());
+		JS->Set("disk.layout.sectors", "%d", Disk->GetLayoutSectors());
+		JS->Set("disk.sectors_total", "%d", Disk->GetSectorCount());
+	}
+
 	SectorBoot0 *boot0 = (SectorBoot0 *)Disk->GetSector(0);
 	if (memcmp(boot0->magic_dos, "DOS", 3)==0) clog(1,"# ANALYZE: boot block magic ok.\n");
 	else {
@@ -249,12 +262,15 @@ bool FormatDiskAmiga::Analyze()
 	}
 
 	char sbuf[32]; strncpy(sbuf, root->name, root->name_len);
+	if (0) JS->Set("volume.label", sbuf);
 	clog(1,"# ANALYZE: volume label is '%s'.\n", sbuf);
 
 	// if we got this far, this probably is a proper Amiga disk
 	SetDiskType(DT_AMIGA);
+	if (0) JS->Set("disk.type", "amiga");
 	if (Disk->GetLayoutSectors()==11) SetDiskSubType(DST_3_5DD);
 	if (Disk->GetLayoutSectors()==22) SetDiskSubType(DST_3_5HD);
+	if (0) JS->Set("disk.subtype", GetDiskSubTypeString());
 
 	// Initialize DiskMap
 	{
@@ -345,6 +361,14 @@ bool FormatDiskAmiga::Analyze()
 				DMap->OutputMaps(fnbuf);
 			}
 		}
+	}
+
+	// Output JSON data
+	if (0) 
+	{
+		JS->Dump();
+		JS->WriteToFile("foo");
+		delete (JS);
 	}
 
 	// Export

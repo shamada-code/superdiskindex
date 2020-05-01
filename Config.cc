@@ -21,5 +21,6 @@ config_t Config =
     false, // export
     false, // log
     false, // maps
+    false, // json
     FMT_ANY // format
 };

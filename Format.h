@@ -14,7 +14,7 @@
 class Format
 {
 public:
-	Format() : Disk(NULL),LastCyl(0),LastHead(0),LastSect(0),SectSize(512) {}
+	Format() : Disk(NULL),LastCyl(0),LastHead(0),LastSect(0),SectSize(512),JS(NULL) {}
 	virtual ~Format() {}
 
 	void SetVirtualDisk(class VirtualDisk *disk) { Disk=disk; }
@@ -54,6 +54,8 @@ protected:
 
 	u32 DiskType;
 	u32 DiskSubType;
+
+	class JsonState *JS;
 };
 
 typedef Format *pFormat;
