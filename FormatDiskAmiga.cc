@@ -211,6 +211,7 @@ void FormatDiskAmiga::HandleBlock(Buffer *buffer, int currev)
 		if (crc1ok)
 		{
 			LastCyl = maxval(LastCyl, disktrack>>1);
+			LastHead = 1; // we only support double sided amiga disks
 			LastSect = maxval(LastSect, disksect);
 		}
 
