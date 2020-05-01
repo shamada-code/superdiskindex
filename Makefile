@@ -46,6 +46,6 @@ $(TGT): $(OBJS:%.o=tmp/%.o)
 	$(CXX) -o $@ $(OBJS:%.o=tmp/%.o)
 
 tmp/%.o: %.cc Makefile
-	$(CXX) -MMD -Wall -O3 -D_TOOLVERSION=$(VERSION2D) -o $@ -c $<
+	$(CXX) -MMD -Wall -Wextra -O3 -D_TOOLVERSION=$(VERSION2D) -o $@ -c $<
 
 -include $(OBJS:%.o=tmp/%.d)
