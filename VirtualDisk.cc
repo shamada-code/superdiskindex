@@ -122,12 +122,22 @@ bool VirtualDisk::IsSectorMissing(u16 blk)
 {
 	return Disk.Cyls[blk2cyl(blk)].Heads[blk2head(blk)].Sectors[blk2sect(blk)].Merged.used==false;
 }
+bool VirtualDisk::IsSectorMissing(u16 c, u16 h, u16 s)
+{
+	return Disk.Cyls[c].Heads[h].Sectors[s].Merged.used==false;
+}
 
 bool VirtualDisk::IsSectorCRCBad(u16 blk)
 {
 	return (
 		(Disk.Cyls[blk2cyl(blk)].Heads[blk2head(blk)].Sectors[blk2sect(blk)].Merged.crc1ok==false) ||
 		(Disk.Cyls[blk2cyl(blk)].Heads[blk2head(blk)].Sectors[blk2sect(blk)].Merged.crc2ok==false) );
+}
+bool VirtualDisk::IsSectorCRCBad(u16 c, u16 h, u16 s)
+{
+	return (
+		(Disk.Cyls[c].Heads[h].Sectors[s].Merged.crc1ok==false) ||
+		(Disk.Cyls[c].Heads[h].Sectors[s].Merged.crc2ok==false) );
 }
 
 void VirtualDisk::MergeRevs()

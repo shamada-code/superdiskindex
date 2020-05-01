@@ -60,7 +60,9 @@ public:
 	void *GetSector(u8 c, u8 h, u8 s);
 	void *GetSector(u16 blk);
 	bool IsSectorMissing(u16 blk);
+	bool IsSectorMissing(u16 c, u16 h, u16 s);
 	bool IsSectorCRCBad(u16 blk);
+	bool IsSectorCRCBad(u16 c, u16 h, u16 s);
 	u32 GetMissingCount() { return SectorsMissing; }
 	u32 GetCRCBadCount() { return SectorsCRCBad; }
 
