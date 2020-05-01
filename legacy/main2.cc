@@ -647,7 +647,7 @@ int main(int argc, char **argv)
 			while ( (n2<hs) && ( ((topi[n2]>(topi[n0]-bw)) && (topi[n2]<(topi[n0]+bw))) || ((topi[n2]>(topi[n1]-bw)) && (topi[n2]<(topi[n1]+bw))) ) ) n2++;
 			if (options.verbose>=3) printf("%d/%d/%d\n",n0,n1,n2);
 			if (options.verbose>=3) printf("%d/%d/%d\n",topi[n0],topi[n1],topi[n2]);
-			int t8ms = max( max(topi[n0], topi[n1]), topi[n2]);
+			int t8ms = maxval( maxval(topi[n0], topi[n1]), topi[n2]);
 			if (options.verbose>=3) printf("t_8ms = %d\n",t8ms);
 			int t1 = t8ms/4;
 			if (options.verbose>=3) printf("t_1 = %d\n",t1);

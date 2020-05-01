@@ -205,7 +205,7 @@ u16 FluxData::DetectTimings(void *data, u32 size)
 	int n2 = n1+1;
 	while ( (n2<hs) && ( ((topi[n2]>(topi[n0]-bw)) && (topi[n2]<(topi[n0]+bw))) || ((topi[n2]>(topi[n1]-bw)) && (topi[n2]<(topi[n1]+bw))) ) ) n2++;
 	//clog(3,"%d/%d/%d\n",n0,n1,n2);
-	int t8ms = max( max(topi[n0], topi[n1]), topi[n2]);
+	int t8ms = maxval( maxval(topi[n0], topi[n1]), topi[n2]);
 	int t1 = t8ms/4;
 	clog(2,"###_Timing_info_#################################\n");
 	clog(2,"# Short Seq:     %d (%.1fus)\n", topi[n0], (float)topi[n0]*25.0f*0.001f);

@@ -164,7 +164,7 @@ void FormatDiskAmiga::HandleBlock(Buffer *buffer, int currev)
 	// 	clog(2,"# Sector Data + %04x\n", (db[2+512+0]<<8)|db[2+512+1]);
 	// }
 	//u16 *p16 = (u16 *)(buffer->GetBuffer());
-	int sc = max(1,buffer->GetFill()/0x220);
+	int sc = maxval(1,buffer->GetFill()/0x220);
 	for (int s=0; s<sc; s++)
 	{
 		u16 *p16 = (u16 *)(buffer->GetBuffer())+(s*0x110);
@@ -210,8 +210,8 @@ void FormatDiskAmiga::HandleBlock(Buffer *buffer, int currev)
 
 		if (crc1ok)
 		{
-			LastCyl = max(LastCyl, disktrack>>1);
-			LastSect = max(LastSect, disksect);
+			LastCyl = maxval(LastCyl, disktrack>>1);
+			LastSect = maxval(LastSect, disksect);
 		}
 
 		if (Config.verbose>=3) hexdump(sect_data.GetBuffer(), sect_data.GetFill());

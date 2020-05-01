@@ -197,9 +197,9 @@ void FormatDiskIBM::HandleBlock(Buffer *buffer, int currev)
 		{
 			if (!LayoutLocked)
 			{
-				LastCyl=max(LastCyl,db[2]);
-				LastHead=max(LastHead,db[3]);
-				LastSect=max(LastSect,db[4]-1); // Sectors on ibm are starting with "1"!
+				LastCyl=maxval(LastCyl,db[2]);
+				LastHead=maxval(LastHead,db[3]);
+				LastSect=maxval(LastSect,db[4]-1); // Sectors on ibm are starting with "1"!
 			}
 			cur_c=db[2];
 			cur_h=db[3];
@@ -247,7 +247,7 @@ void FormatDiskIBM::HandleBlock(Buffer *buffer, int currev)
 			cur_c=cur_h=cur_s=-1;
 		}
 	}
-	//hexdump(buffer->GetBuffer(), min(buffer->GetFill(), 64));
+	//hexdump(buffer->GetBuffer(), minval(buffer->GetFill(), 64));
 }
 
 bool FormatDiskIBM::Analyze()
