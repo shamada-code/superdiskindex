@@ -26,9 +26,13 @@ struct config_t
 
 enum DiskFormat
 {
-	FMT_ANY = 0,
-	FMT_AMIGA = 1,
-	FMT_IBM = 2,
+	FMT_AMIGA=0,
+	FMT_IBM,
+	FMT_1541,
+	FMT_1581,
+	
+	FMT_COUNT,
+	FMT_ANY,
 };
 
 extern config_t Config;

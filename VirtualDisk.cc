@@ -240,3 +240,28 @@ void VirtualDisk::ExportIMG(char const *fn)
 	// same format as adf
 	ExportADF(fn);
 }
+
+void VirtualDisk::ExportD64(char const *fn)
+{
+	int smap[] = {
+		21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,21,
+		19,19,19,19,19,19,19,
+		18,18,18,18,18,18,
+		17,17,17,17,17,
+	};
+	int ss=256;
+
+	int fd = open(fn, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
+	for (int t=0; t<35; t++)
+	{
+		for (int s=0; s<smap[t]; s++)
+		{
+			u32 ofs = 0;
+			for (int i=0; i<t; i++) ofs+=smap[i]*ss;
+			ofs+=s*ss;
+			//if (s==0) clog(1, "#d64ofs: t%02d: $%05x\n", t+1, ofs);
+			write(fd, FinalDisk->GetBuffer()+ofs, ss);
+		}
+	}
+	close(fd);
+}

@@ -12,6 +12,8 @@
 #include "BitStream.h"
 #include "FormatDiskIBM.h"
 #include "FormatDiskAmiga.h"
+#include "FormatDiskC64_1541.h"
+#include "FormatDiskC64_1581.h"
 #include "VirtualDisk.h"
 #include <getopt.h>
 #include "Helpers.h"
@@ -45,6 +47,8 @@ void print_help()
 	printf("     --format-any          | Test for any known formats (default)\n");
 	printf("     --format-amiga        | Test only for amiga format\n");
 	printf("     --format-ibm          | Test only for ibm pc/atari format\n");
+	printf("     --format-1541         | Test only for c64 1541(5.25\") format\n");
+	printf("     --format-1581         | Test only for c64 1581(3.5\") format\n");
 	printf("  -v                       | Increase verbosity (can be applied more than once)\n");
 	printf("  -q,--quiet               | Set verbosity to minimum level\n");
 	printf("\n");
@@ -98,6 +102,8 @@ int main(int argc, char **argv)
 		{"format-any", 0, &Config.format, FMT_ANY },
 		{"format-amiga", 0, &Config.format, FMT_AMIGA },
 		{"format-ibm", 0, &Config.format, FMT_IBM },
+		{"format-1541", 0, &Config.format, FMT_1541 },
+		{"format-1581", 0, &Config.format, FMT_1581 },
 		{0,0,0,0}
 	};
 	int ret = 0;
@@ -140,13 +146,17 @@ int main(int argc, char **argv)
 		track_e=Config.track+1;
 	}
 
-	int FormatCount=Config.format==FMT_ANY?2:1;
+	int FormatCount=Config.format==FMT_ANY?FMT_COUNT:1;
 	pFormat *Formats = new pFormat[FormatCount];
 	int formatidx=0;
 	if ((Config.format==FMT_ANY)||(Config.format==FMT_IBM))
 		Formats[formatidx++] = new FormatDiskIBM();
 	if ((Config.format==FMT_ANY)||(Config.format==FMT_AMIGA))
 		Formats[formatidx++] = new FormatDiskAmiga();
+	if ((Config.format==FMT_ANY)||(Config.format==FMT_1541))
+		Formats[formatidx++] = new FormatDiskC64_1541();
+	if ((Config.format==FMT_ANY)||(Config.format==FMT_1581))
+		Formats[formatidx++] = new FormatDiskC64_1581();
 
 	for (int formatidx=0; formatidx<FormatCount; formatidx++)
 	{
