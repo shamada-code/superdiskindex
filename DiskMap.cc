@@ -33,6 +33,7 @@ DiskMap::~DiskMap()
 
 void DiskMap::SetBitsSector(u32 sector, u32 flags)
 {
+	if (sector>=SectorCount) { clog(2,"# ERR: Cannot mark sector %d in DiskMap (OOB).", sector); return; }
 	Sectors[sector] |= flags;
 }
 
