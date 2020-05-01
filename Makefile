@@ -10,6 +10,7 @@ OBJS+=MFM.o Helpers.o VirtualDisk.o
 OBJS+=JsonState.o
 OBJS+=GCR.o
 OBJS+=CBM.o
+OBJS+=DiskLayout.o
 
 CXXFLAGS=-Wall
 
