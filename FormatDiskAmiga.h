@@ -12,6 +12,8 @@
 #include "Format.h"
 #include "Buffer.h"
 
+///////////////////////////////////////////////////////////
+
 class FormatDiskAmiga : public Format
 {
 public:
