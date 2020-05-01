@@ -27,7 +27,7 @@ struct _1540_sysblk
 	u8 dir0_sect;
 	u8 format;
 	u8 unused;
-	u8 bam[140];
+	u32 bam[35];
 	char label[18];
 	u8 id1;
 	u8 id2;
@@ -174,7 +174,7 @@ bool FormatDiskC64_1541::Analyze()
 	clog(1, "# DISK: ID = $%02x $%02x (%c%c)\n",sys->id1,sys->id2,sys->id1,sys->id2);
 	clog(1, "# DISK: DOSVersion = %c%c\n",sys->dosversion,sys->dosformat);
 
-	// prep and int dmap
+	// prep and init dmap
 	{
 		DMap = new DiskMap(DLayout->GetTotalSectors());
 		DMap->SetBitsSector(DLayout->CHStoBLK(17,0,0), DMF_ROOTBLOCK);
@@ -185,6 +185,16 @@ bool FormatDiskC64_1541::Analyze()
 			DLayout->BLKtoCHS(i, &c,&h,&s);
 			if (Disk->IsSectorCRCBad(c,h,s)) DMap->SetBitsSector(i, DMF_CRC_LOWLEVEL_BAD);
 			if (Disk->IsSectorMissing(c,h,s)) DMap->SetBitsSector(i, DMF_MISSING);
+		}
+		// scan/mirror blockmap
+		for (int i=0; i<35; i++)
+		{
+			u8 freesect = sys->bam[i]&0xff;
+			u32 mapbits = sys->bam[i]>>8;
+			for (int j=0; j<DLayout->GetTrackLen(i); j++)
+			{
+				DMap->SetBitsSector(DLayout->CHStoBLK(i,0, j), (mapbits&(0x1<<j))>0?0:DMF_BLOCK_USED);
+			}
 		}
 	}
 

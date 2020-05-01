@@ -51,6 +51,7 @@ protected:
 
 	void DetectFAT();
 	enum _FatType FatType;
+	u32 ClusterCount;
 	char const *FatTypeName(_FatType fattype);
 
 	int cur_c,cur_h,cur_s;

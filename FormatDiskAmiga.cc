@@ -335,6 +335,7 @@ bool FormatDiskAmiga::Analyze()
 				if (sectidx<Disk->GetSectorCount())
 				{
 					u8 sect_free = ((bmval&(1<<j))>0);
+					DMap->SetBitsSector(sectidx, sect_free?0:DMF_BLOCK_USED);
 					if ( (sect_free) && (DMap->GetSector(sectidx, DMF_CONTENT_MASK)>0) )
 					{
 						clog(1,"# WARNING: BlockMap mismatch - Sector %d is marked free, but belongs to a file/directory!\n", sectidx);

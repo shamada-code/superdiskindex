@@ -325,6 +325,37 @@ bool FormatDiskIBM::Analyze()
 		}
 	}
 
+	// scan fat and mirror content in DiskMap
+	{
+		for (int i=0; i<boot0->bpb.fat_count; i++) {
+			int j=0;
+			u32 s = i*fatsects+j+boot0->bpb.reserved_sectors;
+			u8 *fat = (u8 *)Disk->GetSector(s);
+			
+			if (FatType==FAT12)
+			{
+				fat+=3;
+				for (u32 k=1; k<ClusterCount/2; k++) {
+					u16 a = fat[0] | ((fat[1]&0xf)<<8);
+					u16 b = ((fat[1]&0xf0)>>4) | (fat[2]<<4);
+					if (0) {}
+					else if ((a>=0x2) && (a<0xff0)) DMap->SetBitsCluster(k*2+0, DMF_BLOCK_USED);
+					else if ((a>=0xff8) && (a<0x1000)) DMap->SetBitsCluster(k*2+0, DMF_BLOCK_USED);
+					else if (a==0xff7) DMap->SetBitsCluster(k*2+0, DMF_BLOCK_BAD);
+					if (0) {}
+					else if ((b>=0x2) && (b<0xff0)) DMap->SetBitsCluster(k*2+1, DMF_BLOCK_USED);
+					else if ((b>=0xff8) && (b<0x1000)) DMap->SetBitsCluster(k*2+1, DMF_BLOCK_USED);
+					else if (b==0xff7) DMap->SetBitsCluster(k*2+1, DMF_BLOCK_BAD);
+					fat+=3;
+				}
+			} else if (FatType==FAT16) {
+				//:todo: add code for scanning fat16
+			} else if (FatType==FAT32) {
+				//:todo: add code for scanning fat32
+			}
+		}
+	}
+
 	u32 bad_sectors_in_used_blocks=0;
 	// Listing
 	{
@@ -491,10 +522,10 @@ void FormatDiskIBM::DetectFAT()
 	}
 	u32 datasects = totalsects - (boot0->bpb.reserved_sectors+(boot0->bpb.fat_count*fatsects)+root_dir_sects);
 
-	u32 clustercount = datasects / boot0->bpb.sect_per_cluster;
+	ClusterCount = datasects / boot0->bpb.sect_per_cluster;
 
-	if (clustercount<4085) FatType=FAT12;
-	else if (clustercount<65525) FatType=FAT16;
+	if (ClusterCount<4085) FatType=FAT12;
+	else if (ClusterCount<65525) FatType=FAT16;
 	else FatType=FAT32;
 }
 

@@ -118,10 +118,11 @@ void DiskMap::DPrintBlockMap(int fd)
 		for (u32 j=0; (j<outputwidth)&&(i*outputwidth+j<SectorCount); j++)
 		{
 			char stype = '?';
-			switch (GetSector(i*outputwidth+j, DMF_CONTENT_MASK))
+			switch (GetSector(i*outputwidth+j, DMF_BLOCKMAP_MASK))
 			{
 				case 0: stype='.'; break;
-				default: stype='+'; break;
+				case DMF_BLOCK_USED: stype='+'; break;
+				default: stype='?'; break;
 			}
 			dprintf(fd, "%c",stype);
 		}

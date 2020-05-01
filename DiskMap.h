@@ -11,11 +11,13 @@
 
 enum DiskMapFlags
 {
+	// flags for crc/capture status
 	DMF_CRC_LOWLEVEL_BAD 	= 0x0001,
 	DMF_CRC_HIGHLEVEL_BAD = 0x0002,
 	DMF_MISSING			 			= 0x0004,
 	DMF_HEALTH_MASK				= 0x000f,
 
+	// flags for type of sector content
 	DMF_BOOTBLOCK 				= 0x0010,
 	DMF_ROOTBLOCK 				= 0x0020,
 	DMF_BLOCKMAP 					= 0x0040,
@@ -24,6 +26,11 @@ enum DiskMapFlags
 	DMF_FILEHEADER				= 0x0100,
 	DMF_DATA							= 0x0200,
 	DMF_CONTENT_MASK			= 0x0ff0,
+
+	// flags for mirroring blockmap/fat
+	DMF_BLOCK_USED				= 0x1000,
+	DMF_BLOCK_BAD					= 0x2000,
+	DMF_BLOCKMAP_MASK			= 0x3000,
 };
 
 class DiskMap
