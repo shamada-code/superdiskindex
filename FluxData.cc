@@ -107,7 +107,7 @@ int FluxData::GetRevolutions()
 	return head->num_revs;
 }
 
-void FluxData::ScanTrack(int track, int rev, BitStream *bits)
+void FluxData::ScanTrack(int track, int rev, BitStream *bits, bool gcr_mode)
 {
 	/*
 	int r0=0;
@@ -134,7 +134,7 @@ void FluxData::ScanTrack(int track, int rev, BitStream *bits)
 	// first detect timing
 	u32 c = th->revs[r].fluxcount;
 	void *data = (u8 *)th+th->revs[r].data_offset;
-	u16 t1 = DetectTimings(data, c);
+	u16 t1 = DetectTimings(data, c, gcr_mode);
 	
 	u16 *times = (u16 *)data;
 	for (u32 b=0; b<c; b++)
@@ -142,6 +142,9 @@ void FluxData::ScanTrack(int track, int rev, BitStream *bits)
 		u8 val = Quantize(swap16(times[b]), t1);
 		switch (val)
 		{
+			case 1:
+				bits->Feed(1);
+				break;
 			case 2:
 				bits->Feed(0);
 				bits->Feed(1);
@@ -166,7 +169,7 @@ void FluxData::ScanTrack(int track, int rev, BitStream *bits)
 	//}
 }
 
-u16 FluxData::DetectTimings(void *data, u32 size)
+u16 FluxData::DetectTimings(void *data, u32 size, bool gcr_mode)
 {
 	u16 *dw = (u16 *)data;
 
@@ -207,6 +210,7 @@ u16 FluxData::DetectTimings(void *data, u32 size)
 	//clog(3,"%d/%d/%d\n",n0,n1,n2);
 	int t8ms = maxval( maxval(topi[n0], topi[n1]), topi[n2]);
 	int t1 = t8ms/4;
+	if (gcr_mode) t1 = t8ms/3;
 	clog(2,"###_Timing_info_#################################\n");
 	clog(2,"# Short Seq:     %d (%.1fus)\n", topi[n0], (float)topi[n0]*25.0f*0.001f);
 	clog(2,"# Med Seq:       %d (%.1fus)\n", topi[n1], (float)topi[n1]*25.0f*0.001f);
