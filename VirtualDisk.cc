@@ -100,9 +100,9 @@ void VirtualDisk::AddSector(u8 c, u8 h, u8 s, u8 r, void *p, u32 size, bool crc1
 
 void *VirtualDisk::GetSector(u8 c, u8 h, u8 s)
 {
-	if (c>=Cyls) { clog(0, "# VDisk: Out of bounds. Trying to access cyl %d/%d.\n", c, Cyls); return NULL; }
-	if (h>=Heads) { clog(0, "# VDisk: Out of bounds. Trying to access head %d/%d.\n", h, Heads); return NULL; }
-	if (s>=Sects) { clog(0, "# VDisk: Out of bounds. Trying to access sector %d/%d.\n", s, Sects); return NULL; }
+	if (c>=Cyls) { clog(2, "# VDisk: Out of bounds. Trying to access cyl %d/%d.\n", c, Cyls); return NULL; }
+	if (h>=Heads) { clog(2, "# VDisk: Out of bounds. Trying to access head %d/%d.\n", h, Heads); return NULL; }
+	if (s>=Sects) { clog(2, "# VDisk: Out of bounds. Trying to access sector %d/%d.\n", s, Sects); return NULL; }
 	if (FinalDisk==NULL)
 	{
 		clog(0, "ERR: VirtualDisk has not been merged yet. This is a code bug.\n");
