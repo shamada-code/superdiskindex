@@ -7,6 +7,9 @@
 // 
 //
 
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "Global.h"
 #include "Helpers.h"
 #include "Types.h"
@@ -153,40 +156,46 @@ void JsonState::Dump()
 
 void JsonState::WriteToFile(char const *fn)
 {
-	int il=0;
-	SCtx curctx,ectx;
-	for (kvmap_t::const_iterator it = Storage->kvmap.begin(); it!=Storage->kvmap.end(); it++)
-	{
-		ectx.CreateFromString(it->first);
-		//printf("%s || %s || %s\n", ((std::string)ectx).c_str(), ((std::string)ectx.GetPath()).c_str(), ((std::string)ectx.GetElement()).c_str());
-		if (!ectx.GetPath().Compare(curctx))
-		{
-			for (int i=0; i<curctx.Size(); i++)
-			{
-				if ((ectx.Get(i).compare(curctx.Get(i))!=0) && (curctx.Size()>=(ectx.Size()-1)))
-				{
-					il--;
-					printf ("%s}\n", indent(il).c_str());
-					curctx.Pop();
-				}
-			}
+	int fd = open(fn, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
 
-			for (int i=0; i<ectx.Size()-1; i++)
-			{
-				if (ectx.Get(i).compare(curctx.Get(i))!=0)
-				{
-					printf ("%s\"%s\": {\n", indent(il).c_str(), ectx.Get(i).c_str());
-					il++;
-				}
-			}
-			curctx=ectx.GetPath();
-		}
-		printf("%s\"%s\": \"%s\",\n", indent(il).c_str(), ectx.GetElement().c_str(), it->second.c_str());
-	}
-	while (curctx.Size()>0)
+	if (fd>=0)
 	{
-		il--;
-		printf ("%s}\n", indent(il).c_str());
-		curctx.Pop();
+		int il=0;
+		SCtx curctx,ectx;
+		for (kvmap_t::const_iterator it = Storage->kvmap.begin(); it!=Storage->kvmap.end(); it++)
+		{
+			ectx.CreateFromString(it->first);
+			//printf("%s || %s || %s\n", ((std::string)ectx).c_str(), ((std::string)ectx.GetPath()).c_str(), ((std::string)ectx.GetElement()).c_str());
+			if (!ectx.GetPath().Compare(curctx))
+			{
+				for (int i=0; i<curctx.Size(); i++)
+				{
+					if ((ectx.Get(i).compare(curctx.Get(i))!=0) && (curctx.Size()>=(ectx.Size()-1)))
+					{
+						il--;
+						dprintf(fd, "%s}\n", indent(il).c_str());
+						curctx.Pop();
+					}
+				}
+
+				for (int i=0; i<ectx.Size()-1; i++)
+				{
+					if (ectx.Get(i).compare(curctx.Get(i))!=0)
+					{
+						dprintf(fd, "%s\"%s\": {\n", indent(il).c_str(), ectx.Get(i).c_str());
+						il++;
+					}
+				}
+				curctx=ectx.GetPath();
+			}
+			dprintf(fd, "%s\"%s\": \"%s\",\n", indent(il).c_str(), ectx.GetElement().c_str(), it->second.c_str());
+		}
+		while (curctx.Size()>0)
+		{
+			il--;
+			dprintf(fd, "%s}\n", indent(il).c_str());
+			curctx.Pop();
+		}
 	}
+	close(fd);
 }
