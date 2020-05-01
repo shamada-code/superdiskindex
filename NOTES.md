@@ -17,6 +17,7 @@ ToDo
 * ~~add filesystem checks~~
 * add custom formatting options for output basename
 * ~~add make install to makefile~~
+* add json output of disk state for machine-parsing
 
 WishList
 --------
