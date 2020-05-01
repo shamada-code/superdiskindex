@@ -121,16 +121,19 @@ u16 DiskLayout::BLKtoC(u32 blk)
 {
 	u16 tmp=0;
 	BLKtoCHS(blk, &tmp, NULL, NULL);
+	return tmp;
 }
 
 u16 DiskLayout::BLKtoH(u32 blk)
 {
 	u16 tmp=0;
 	BLKtoCHS(blk, NULL, &tmp, NULL);
+	return tmp;
 }
 
 u16 DiskLayout::BLKtoS(u32 blk)
 {
 	u16 tmp=0;
 	BLKtoCHS(blk, NULL, NULL, &tmp);
+	return tmp;
 }
