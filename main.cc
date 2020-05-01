@@ -190,7 +190,7 @@ int main(int argc, char **argv)
 				for (int r=r0; r<rn; r++)
 				{
 					bits->SetRev(r);
-					flux->ScanTrack(t,r, bits);
+					flux->ScanTrack(t,r, bits, fmt->UsesGCR());
 				}
 				delete(bits); bits=NULL;
 			}
