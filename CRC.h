@@ -58,6 +58,7 @@ protected:
 	T State;
 };
 
+typedef CRC_XOR<u8> CRC8_xor;
 typedef CRC_XOR<u16> CRC16_xor;
 typedef CRC_XOR<u32> CRC32_xor;
 
