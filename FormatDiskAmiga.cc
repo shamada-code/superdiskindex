@@ -285,7 +285,7 @@ bool FormatDiskAmiga::Analyze()
 				DMap->SetBitsSector(swap(root->bm_pages[i]), DMF_BLOCKMAP);
 			}
 		}
-		for (int i=0; i<Disk->GetSectorCount(); i++)
+		for (u32 i=0; i<Disk->GetSectorCount(); i++)
 		{
 			if (Disk->IsSectorMissing(i)) DMap->SetBitsSector(i, DMF_MISSING);
 			if (Disk->IsSectorCRCBad(i)) DMap->SetBitsSector(i, DMF_CRC_LOWLEVEL_BAD);
@@ -323,7 +323,7 @@ bool FormatDiskAmiga::Analyze()
 		u32 *blkmap = (u32 *)Disk->GetSector(blkmapidx);
 		//clog(1, "BLOCKMAP:\n# %04d |   ", 0);
 		bool blkmapmatch=true;
-		for (int i=0; i<Disk->GetSectorCount()/32; i++)
+		for (u32 i=0; i<Disk->GetSectorCount()/32; i++)
 		{
 			u32 bmval = swap(blkmap[i+1]);
 			for (int j=0; j<32; j++)
@@ -438,7 +438,7 @@ void FormatDiskAmiga::ParseDirectory(int fd, u32 block, char const *prefix)
 			{
 				ParseDirectory(fd, blk, sbuf2);
 			}
-			if (swap(filehead->sec_type)==-3)
+			if ((int)swap(filehead->sec_type)==-3)
 			{
 				ScanFile(blk);
 			}

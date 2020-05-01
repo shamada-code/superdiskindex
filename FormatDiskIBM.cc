@@ -310,7 +310,7 @@ bool FormatDiskIBM::Analyze()
 		{
 			DMap->SetBitsSector(rootblk+i, DMF_ROOTBLOCK);
 		}
-		for (int i=0; i<Disk->GetSectorCount(); i++)
+		for (u32 i=0; i<Disk->GetSectorCount(); i++)
 		{
 			if (Disk->IsSectorMissing(i)) DMap->SetBitsSector(i, DMF_MISSING);
 			if (Disk->IsSectorCRCBad(i)) DMap->SetBitsSector(i, DMF_CRC_LOWLEVEL_BAD);

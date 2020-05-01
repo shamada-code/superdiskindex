@@ -179,7 +179,7 @@ bool FormatDiskC64_1541::Analyze()
 		DMap = new DiskMap(DLayout->GetTotalSectors());
 		DMap->SetBitsSector(DLayout->CHStoBLK(17,0,0), DMF_ROOTBLOCK);
 		// set crc states
-		for (int i=0; i<DLayout->GetTotalSectors(); i++)
+		for (u32 i=0; i<DLayout->GetTotalSectors(); i++)
 		{
 			u16 c,h,s;
 			DLayout->BLKtoCHS(i, &c,&h,&s);

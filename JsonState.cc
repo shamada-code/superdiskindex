@@ -57,7 +57,7 @@ public:
 		}
 	}
 
-	std::string Get(int level)
+	std::string Get(u32 level)
 	{
 		if (level>=col.size()) return "";
 		return col[level];
@@ -66,14 +66,14 @@ public:
 	bool Compare(SCtx const &other)
 	{
 		if (col.size()!=other.col.size()) return false;
-		for (int i=0; i<col.size(); i++) if (col[i].compare(other.col[i])!=0) return false;
+		for (u32 i=0; i<col.size(); i++) if (col[i].compare(other.col[i])!=0) return false;
 		return true;
 	}
 
 	operator std::string()
 	{
 		std::string tmp;
-		for (int i=0; i<col.size(); i++) { tmp+="/"; tmp+=col[i]; }
+		for (u32 i=0; i<col.size(); i++) { tmp+="/"; tmp+=col[i]; }
 		return tmp;
 	}
 
@@ -81,7 +81,7 @@ public:
 	{
 		SCtx gen;
 		if (col.size()==0) return gen;
-		for (int i=0; i<col.size()-1; i++)
+		for (u32 i=0; i<col.size()-1; i++)
 		{
 			gen.col.push_back(col[i]);
 		}
