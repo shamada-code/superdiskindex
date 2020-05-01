@@ -272,8 +272,16 @@ bool FormatDiskIBM::Analyze()
 
 	// This seems to be a proper ibm formatted disk.
 	SetDiskType(DT_IBMPC);
-	if (Disk->GetLayoutSectors()==9) SetDiskSubType(DST_3_5DD);
-	if (Disk->GetLayoutSectors()==18) SetDiskSubType(DST_3_5HD);
+	if (Disk->GetLayoutCylinders()==40)
+	{
+		if (Disk->GetLayoutSectors()==9) SetDiskSubType(DST_5_25DD);
+	}
+	if (Disk->GetLayoutCylinders()==80)
+	{
+		if (Disk->GetLayoutSectors()==15) SetDiskSubType(DST_5_25HD);
+		if (Disk->GetLayoutSectors()==9) SetDiskSubType(DST_3_5DD);
+		if (Disk->GetLayoutSectors()==18) SetDiskSubType(DST_3_5HD);
+	}
 
 	if (boot0->signature!=0xaa55)
 	{
