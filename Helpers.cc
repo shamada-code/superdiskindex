@@ -99,5 +99,5 @@ void clog_init()
 
 void clog_exit()
 {
-	if (clog>=0) close(__clog_fd);
+	if (__clog_fd>=0) close(__clog_fd);
 }
