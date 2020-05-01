@@ -163,19 +163,19 @@ int main(int argc, char **argv)
 		VirtualDisk *VD=NULL;
 
 		Format *fmt = Formats[formatidx];
-			clog(1,"######################################################################\n");
+		clog(1,"######################################################################\n");
 		clog(1,"##### Checking for '%s' Format \n", fmt->GetName());
 
 		for (int pass=0; pass<2; pass++)
 		{
-			clog(1,"###################################\n");
-			clog(1,"# Pass %d\n", pass);
+			//clog(1,"###################################\n");
+			//clog(1,"# Pass %d\n", pass);
 			if (pass==1) 
 			{
-				if ((fmt->GetCyls()==1) && (fmt->GetHeads()==2) && (fmt->GetSects()==1))
+				if ((fmt->GetCyls()==1) && (fmt->GetHeads()==1) && (fmt->GetSects()==1))
 				{
 					// empty disk - we can skip this Pass.
-					clog(1,"# No data found. Skipping pass.\n");
+					clog(1,"# No data found.\n");
 					continue;
 				}
 				if (VD!=NULL) { delete(VD); VD=NULL; }
