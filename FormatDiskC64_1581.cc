@@ -22,17 +22,17 @@ u8 FormatDiskC64_1581::GetSyncWordCount()
 	return 0;
 }
 
-u32 FormatDiskC64_1581::GetSyncWord(int n)
+u32 FormatDiskC64_1581::GetSyncWord(int /*n*/)
 {
 	return 0;
 }
 
-u32 FormatDiskC64_1581::GetSyncBlockLen(int n)
+u32 FormatDiskC64_1581::GetSyncBlockLen(int /*n*/)
 {
 	return 0;
 }
 
-void FormatDiskC64_1581::HandleBlock(Buffer *buffer, int currev)
+void FormatDiskC64_1581::HandleBlock(Buffer * /*buffer*/, int /*currev*/)
 {
 
 }
