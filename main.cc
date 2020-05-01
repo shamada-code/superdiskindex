@@ -169,7 +169,7 @@ int main(int argc, char **argv)
 				}
 				if (VD!=NULL) { delete(VD); VD=NULL; }
 				VD = new VirtualDisk();
-				VD->SetLayout(fmt->GetCyls(), fmt->GetHeads(), fmt->GetSects(), flux->GetRevolutions(), 512);
+				VD->SetLayout(fmt->GetCyls(), fmt->GetHeads(), fmt->GetSects(), flux->GetRevolutions(), fmt->GetSectSize());
 				fmt->SetVirtualDisk(VD);
 			}
 
