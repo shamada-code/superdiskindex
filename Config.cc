@@ -24,4 +24,5 @@ config_t Config =
     false, // json
     false, // fluxviz
     FMT_ANY, // format
+    false  // reverse
 };

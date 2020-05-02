@@ -171,8 +171,11 @@ void FluxData::ScanTrack(int track, int rev, BitStream *bits, int pass, bool gcr
 	}
 
 	u16 *times = (u16 *)data;
-	for (u32 b=0; b<c; b++)
+	for (u32 b0=0; b0<c; b0++)
 	{
+		u32 b;
+		if (Config.reverse) b=(c-1)-b0;
+		else b=b0;
 		if ((Config.gen_fluxviz)&&(pass==0))
 		{
 			int y=(h-1)-minval(swap(times[b])>>cy, h-1);

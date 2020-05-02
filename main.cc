@@ -39,6 +39,7 @@ void print_help()
 	printf("  -o,--out <basename>      | Output basename (without extension)\n");
 	printf("  -t,--track <tracknum>    | Only analyze track <tracknum>\n");
 	printf("  -r,--rev <revnum>        | Only use revolution <revnum>\n");
+	printf("     --reverse             | Scan bitstream backwards (for flippy disks)\n");
 	printf("     --listing             | Generate file listing to file <basename>.lst\n");
 	printf("     --export              | Generate disk image <basename>.{adf,img}\n");
 	printf("     --log                 | Generate logfile <basename>.log\n");
@@ -101,6 +102,7 @@ int main(int argc, char **argv)
 		{"verbose", 0, NULL, 'v' },
 		{"quiet", 0, NULL, 'q' },
 		{"archive", 0, NULL, 'a' },
+		{"reverse", 0, &Config.reverse, true },
 		{"format-any", 0, &Config.format, FMT_ANY },
 		{"format-amiga", 0, &Config.format, FMT_AMIGA },
 		{"format-ibm", 0, &Config.format, FMT_IBM },

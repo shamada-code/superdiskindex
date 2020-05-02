@@ -23,6 +23,7 @@ struct config_t
 	int gen_json;
 	int gen_fluxviz;
 	int format;
+	int reverse;
 };
 
 enum DiskFormat
