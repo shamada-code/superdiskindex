@@ -172,49 +172,88 @@ void FluxData::ScanTrack(int track, int rev, BitStream *bits, bool gcr_mode)
 u16 FluxData::DetectTimings(void *data, u32 size, bool gcr_mode)
 {
 	u16 *dw = (u16 *)data;
+	int t1 = 0;
 
-	u64 thist[65536] = {0};
-	for (u32 b=0; b<size; b++)
+	if (0) // version 1 of sync detect
 	{
-		//clog(3,"%04x\n", data[b]);
-		u16 val = ((dw[b]&0xff)<<8) | ((dw[b]&0xff00)>>8); // words are endian flipped in scp file
-		thist[val]++;
-	}
-	int hs=64; // histogram size
-	u64 topv[hs] = {0};
-	u16 topi[hs] = {0};
-	for (int hi=0; hi<65536; hi++)
-	{
-		for (int x=0; x<hs; x++)
+		u64 thist[65536] = {0};
+		for (u32 b=0; b<size; b++)
 		{
-			if (thist[hi]>=topv[x])
+			//clog(3,"%04x\n", data[b]);
+			u16 val = ((dw[b]&0xff)<<8) | ((dw[b]&0xff00)>>8); // words are endian flipped in scp file
+			thist[val]++;
+		}
+		int hs=64; // histogram size
+		u64 topv[hs] = {0};
+		u16 topi[hs] = {0};
+		for (int hi=0; hi<65536; hi++)
+		{
+			for (int x=0; x<hs; x++)
 			{
-				for (int z=(hs-2); z>=x; z--) { topv[z+1]=topv[z]; topi[z+1]=topi[z]; }
-				topv[x] = thist[hi];
-				topi[x] = hi;
-				break;
+				if (thist[hi]>=topv[x])
+				{
+					for (int z=(hs-2); z>=x; z--) { topv[z+1]=topv[z]; topi[z+1]=topi[z]; }
+					topv[x] = thist[hi];
+					topi[x] = hi;
+					break;
+				}
 			}
 		}
+		for (int hi=0; hi<hs; hi++)
+		{
+			//printf("%.1f us (%04x); %lu\n", (float)topi[hi]*25.0f*0.001f, topi[hi], topv[hi]);
+			//clog(3,"%d; %lu\n", topi[hi], topv[hi]);
+		}
+		int n0 = 0;
+		int bw = topi[n0]>>3;
+		int n1 = 1;
+		while ( (n1<hs) && (topi[n1]>(topi[n0]-bw)) && (topi[n1]<(topi[n0]+bw)) ) n1++;
+		int n2 = n1+1;
+		while ( (n2<hs) && ( ((topi[n2]>(topi[n0]-bw)) && (topi[n2]<(topi[n0]+bw))) || ((topi[n2]>(topi[n1]-bw)) && (topi[n2]<(topi[n1]+bw))) ) ) n2++;
+		//clog(3,"%d/%d/%d\n",n0,n1,n2);
+		int t8ms = maxval( maxval(topi[n0], topi[n1]), topi[n2]);
+		t1 = t8ms/4;
+		if (gcr_mode) t1 = t8ms/3;
 	}
-	for (int hi=0; hi<hs; hi++)
+	if (1) // version 2 of sync detect
 	{
-		//printf("%.1f us (%04x); %lu\n", (float)topi[hi]*25.0f*0.001f, topi[hi], topv[hi]);
-		//clog(3,"%d; %lu\n", topi[hi], topv[hi]);
+		float fcur=0;
+		float candidate=0;
+		int ticks=0;
+		for (u32 b=0; b<size; b++)
+		{
+			//clog(3,"%04x\n", data[b]);
+			float val = (u16)swap(dw[b]); // words are endian flipped in scp file
+			if ( (val-fcur) > (fcur*0.2) )
+			{
+				ticks=0;
+			} else {
+				ticks++;
+				if (ticks>30)
+				{
+					if ((candidate==0)||(fcur<candidate))
+					{
+						candidate = fcur;
+					}
+				}
+			}
+			fcur = (fcur+val)*0.5f;
+		}
+		if (gcr_mode) {
+			t1=(u16)candidate;
+			clog(2,"###_Timing_info_GCR_#############################\n");
+			clog(2,"# Short Seq: (..11....)  %d (%.1fus)\n", 1*t1, (float)t1*1*25.0f*0.001f);
+			clog(2,"# Med Seq:   (..101...)  %d (%.1fus)\n", 2*t1, (float)t1*2*25.0f*0.001f);
+			clog(2,"# Long Seq:  (..1001..)  %d (%.1fus)\n", 3*t1, (float)t1*3*25.0f*0.001f);
+			clog(2,"# Bit Frequency: %d (%.1fus / %.1fkHz)\n", t1, (float)t1*25.0f*0.001f, 1000.0f/((float)t1*25.0f*0.001f));
+		} else {
+			t1=(u16)(candidate*0.5f);
+			clog(2,"###_Timing_info_MFM_#############################\n");
+			clog(2,"# Short Seq: (..101....) %d (%.1fus)\n", 2*t1, (float)t1*2*25.0f*0.001f);
+			clog(2,"# Med Seq:   (..1001...) %d (%.1fus)\n", 3*t1, (float)t1*3*25.0f*0.001f);
+			clog(2,"# Long Seq:  (..10001..) %d (%.1fus)\n", 4*t1, (float)t1*4*25.0f*0.001f);
+			clog(2,"# Bit Frequency: %d (%.1fus / %.1fkHz)\n", t1, (float)t1*25.0f*0.001f, 1000.0f/((float)t1*25.0f*0.001f));
+		}
 	}
-	int n0 = 0;
-	int bw = topi[n0]>>3;
-	int n1 = 1;
-	while ( (n1<hs) && (topi[n1]>(topi[n0]-bw)) && (topi[n1]<(topi[n0]+bw)) ) n1++;
-	int n2 = n1+1;
-	while ( (n2<hs) && ( ((topi[n2]>(topi[n0]-bw)) && (topi[n2]<(topi[n0]+bw))) || ((topi[n2]>(topi[n1]-bw)) && (topi[n2]<(topi[n1]+bw))) ) ) n2++;
-	//clog(3,"%d/%d/%d\n",n0,n1,n2);
-	int t8ms = maxval( maxval(topi[n0], topi[n1]), topi[n2]);
-	int t1 = t8ms/4;
-	if (gcr_mode) t1 = t8ms/3;
-	clog(2,"###_Timing_info_#################################\n");
-	clog(2,"# Short Seq:     %d (%.1fus)\n", topi[n0], (float)topi[n0]*25.0f*0.001f);
-	clog(2,"# Med Seq:       %d (%.1fus)\n", topi[n1], (float)topi[n1]*25.0f*0.001f);
-	clog(2,"# Long Seq:      %d (%.1fus)\n", topi[n2], (float)topi[n2]*25.0f*0.001f);
-	clog(2,"# Bit Frequency: %d (%.1fus / %.1fkHz)\n", t1, (float)t1*25.0f*0.001f, 1000.0f/((float)t1*25.0f*0.001f));
 	return t1;
 }
