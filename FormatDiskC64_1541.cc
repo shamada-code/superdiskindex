@@ -168,7 +168,7 @@ bool FormatDiskC64_1541::Analyze()
 	// boot block
 	_1540_sysblk *sys = (_1540_sysblk *)(Disk->GetSector(17,0,0));
 	clog(1, "# DISK: Format = %s\n",sys->format=='A'?"1540":"Unknown");
-	if (sys->format!='A') return false; // only standard c64 floppy format is supported for now.
+	//if (sys->format!='A') return false; // only standard c64 floppy format is supported for now.
 	CBM::petscii2ascii(sbuf, sys->label, 18);
 	clog(1, "# DISK: Label = %s\n",sbuf);
 	clog(1, "# DISK: ID = $%02x $%02x (%c%c)\n",sys->id1,sys->id2,sys->id1,sys->id2);
