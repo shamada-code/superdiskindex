@@ -21,6 +21,7 @@ struct config_t
 	int gen_log;
 	int gen_maps;
 	int gen_json;
+	int gen_fluxviz;
 	int format;
 };
 

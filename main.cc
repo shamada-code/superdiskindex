@@ -43,6 +43,7 @@ void print_help()
 	printf("     --export              | Generate disk image <basename>.{adf,img}\n");
 	printf("     --log                 | Generate logfile <basename>.log\n");
 	printf("     --maps                | Generate maps file <basename>.maps\n");
+	printf("     --fluxviz             | Generate TGA images of selected tracks with timing visualization");
 	printf("  -a,--archive             | shortcut for --listing,--export and --log\n");
 	printf("     --format-any          | Test for any known formats (default)\n");
 	printf("     --format-amiga        | Test only for amiga format\n");
@@ -95,6 +96,7 @@ int main(int argc, char **argv)
 		{"export", 0, NULL, 'e' },
 		{"log", 0, NULL, 'g' },
 		{"maps", 0, NULL, 'm' },
+		{"fluxviz", 0, &Config.gen_fluxviz, true },
 		{"help", 0, NULL, 'h' },
 		{"verbose", 0, NULL, 'v' },
 		{"quiet", 0, NULL, 'q' },

@@ -22,5 +22,6 @@ config_t Config =
     false, // log
     false, // maps
     false, // json
-    FMT_ANY // format
+    false, // fluxviz
+    FMT_ANY, // format
 };

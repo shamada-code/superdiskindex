@@ -16,6 +16,7 @@
 #include "FluxData.h"
 #include "BitStream.h"
 #include "Helpers.h"
+#include "TextureTGA.h"
 
 ///////////////////////////////////////////////////////////
 
@@ -131,14 +132,67 @@ void FluxData::ScanTrack(int track, int rev, BitStream *bits, int pass, bool gcr
 	//for (int r=r0; r<rn; r++)
 	//{
 
+	u16 w=8192; // width of fluxviz image
+	u16 h=512; // height of fluxviz image
+	u8 cx=2; // x (time in track) compression (LSB bits discarded)
+	u8 cy=0; // y (flux timing) compression (LSB bits discarded) 
+	TextureTGA *tex = NULL;
+	if ((Config.gen_fluxviz)&&(pass==0))
+	{
+		tex=new TextureTGA(w,h);
+	}
+
 	// first detect timing
 	u32 c = th->revs[r].fluxcount;
 	void *data = (u8 *)th+th->revs[r].data_offset;
 	u16 t1 = DetectTimings(data, c, gcr_mode);
-	
+
+	if ((Config.gen_fluxviz)&&(pass==0))
+	{
+		u8 mulmap[2][3] = {{1,2,3},{2,3,4}};
+		u8 *mulsel = gcr_mode?mulmap[0]:mulmap[1];
+
+		//int y;
+		int y0,y1;
+		//y=(h-1)-minval((t1*mulsel[0])>>cy, h-1); 
+		y0=(h-1)-minval((t1*mulsel[0]-t1/2)>>cy, h-1); 
+		y1=(h-1)-minval((t1*mulsel[0]+t1/2)>>cy, h-1); 
+		tex->Rect(0,y1,w,y0-y1,0x3fff00ff);
+
+		//y=(h-1)-minval((t1*mulsel[1])>>cy, h-1); 
+		y0=(h-1)-minval((t1*mulsel[1]-t1/2)>>cy, h-1); 
+		y1=(h-1)-minval((t1*mulsel[1]+t1/2)>>cy, h-1); 
+		tex->Rect(0,y1,w,y0-y1,0x5fff00ff);
+
+		//y=(h-1)-minval((t1*mulsel[2])>>cy, h-1); 
+		y0=(h-1)-minval((t1*mulsel[2]-t1/2)>>cy, h-1); 
+		y1=(h-1)-minval((t1*mulsel[2]+t1/2)>>cy, h-1); 
+		tex->Rect(0,y1,w,y0-y1,0x7fff00ff);
+	}
+
 	u16 *times = (u16 *)data;
 	for (u32 b=0; b<c; b++)
 	{
+		if ((Config.gen_fluxviz)&&(pass==0))
+		{
+			int y=(h-1)-minval(swap(times[b])>>cy, h-1);
+			int x=minval((b>>cx),(u16)(w-1));
+			if ((b&(0xffffffff>>(32-cx)))==0)
+			{
+				if (!bits->IsSynced())
+				{
+					tex->LineV(x,0,h,0x3fff0000);
+				} else {
+					switch (bits->GetActiveSyncDef())
+					{
+						case 0: tex->LineV(x,0,h,0x3f00ff00); break;
+						case 1: tex->LineV(x,0,h,0x3f0000ff); break;
+						default: tex->LineV(x,0,h,0x3fffff00);
+					}
+				}
+			}
+			tex->Pixel(x,y,0xffffffff);
+		}
 		u8 val = Quantize(swap16(times[b]), t1);
 		switch (val)
 		{
@@ -166,7 +220,13 @@ void FluxData::ScanTrack(int track, int rev, BitStream *bits, int pass, bool gcr
 		}
 	}
 	bits->Flush();
-	//}
+
+	if ((Config.gen_fluxviz)&&(pass==0))
+	{
+		char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.flux.h%1d.t%02d.tga", Config.fn_out, track%2, track/2);
+		clog(1,"# Generating flux visualization '%s'.\n",fnbuf);
+		tex->Save(fnbuf);
+	}
 }
 
 u16 FluxData::DetectTimings(void *data, u32 size, bool gcr_mode)
