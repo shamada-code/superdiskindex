@@ -229,7 +229,8 @@ bool FormatDiskC64_1541::Analyze()
 			for (int i=0; i<8; i++)
 			{
 				if (dir->entries[i].type==0) continue;
-				
+
+				clog(2,"$%d.%d", dir->entries[i].data_track, dir->entries[i].data_sect);
 				char const *fstatestr = "";
 				int fstate=0;
 				if (dir->entries[i].data_track>0)
@@ -251,7 +252,6 @@ bool FormatDiskC64_1541::Analyze()
 						case 0: etype="NUL"; break;
 						default: etype="???";
 					}
-					clog(2,"$%d.%d", dir->entries[i].data_track-1, dir->entries[i].data_sect);
 					switch (fstate)
 					{
 						case -1: fstatestr = "<BADSIZE>"; break;
