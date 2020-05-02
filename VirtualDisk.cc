@@ -260,7 +260,8 @@ void VirtualDisk::ExportD64(char const *fn)
 			for (int i=0; i<t; i++) ofs+=smap[i]*ss;
 			ofs+=s*ss;
 			//if (s==0) clog(1, "#d64ofs: t%02d: $%05x\n", t+1, ofs);
-			write(fd, FinalDisk->GetBuffer()+ofs, ss);
+			//write(fd, FinalDisk->GetBuffer()+ofs, ss);
+			write(fd, GetSector(t, 0, s), ss);
 		}
 	}
 	close(fd);
