@@ -38,6 +38,9 @@ public:
 
 	class Buffer *GetBuffer() { return Data; }
 
+	bool IsSynced() { return SyncFlag==1; }
+	u8 GetActiveSyncDef() { return ActiveSyncDef; }
+
 protected:
 	void Store(u8 val);
 
