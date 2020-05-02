@@ -22,7 +22,7 @@ public:
 	int GetTrackEnd();
 	int GetRevolutions();
 
-	void ScanTrack(int track, int rev, class BitStream *bits, bool gcr_mode=false);
+	void ScanTrack(int track, int rev, class BitStream *bits, int pass, bool gcr_mode=false);
 	u16 DetectTimings(void *data, u32 size, bool gcr_mode);
 
 protected:

@@ -107,7 +107,7 @@ int FluxData::GetRevolutions()
 	return head->num_revs;
 }
 
-void FluxData::ScanTrack(int track, int rev, BitStream *bits, bool gcr_mode)
+void FluxData::ScanTrack(int track, int rev, BitStream *bits, int pass, bool gcr_mode)
 {
 	/*
 	int r0=0;
