@@ -136,7 +136,7 @@ int main(int argc, char **argv)
 
 	// check param compatability
 	if (strlen(Config.fn_in)==0) { printf("No input file specified (-i).\n"); print_help(); return 1; }
-	if ((Config.gen_export||Config.gen_listing||Config.gen_log)&&(strlen(Config.fn_out)==0)) { printf("Listing,Log and Export modes need output basename defined (-o).\n"); print_help(); return 1; }
+	if ((Config.gen_export||Config.gen_listing||Config.gen_log||Config.gen_maps||Config.gen_fluxviz)&&(strlen(Config.fn_out)==0)) { printf("Listing,Log and Export modes need output basename defined (-o).\n"); print_help(); return 1; }
 	if ((Config.gen_export||Config.gen_listing)&&(Config.track>=0)) { printf("Listing and Export modes are not working with a limited track selection.\n"); print_help(); return 1; }
 
 	// Initialize FluxData
