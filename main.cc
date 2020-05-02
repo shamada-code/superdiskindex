@@ -219,7 +219,7 @@ int main(int argc, char **argv)
 				VD->MergeRevs();
 				if (fmt->Analyze())
 				{
-					clog(0,"# '%s' looks like a valid %s, %s disk.\n", Config.fn_in, fmt->GetDiskTypeString(), fmt->GetDiskSubTypeString());
+					clog(0,"# '%s' looks like a valid %s, %s disk with %d missing and %d bad sectors.\n", Config.fn_in, fmt->GetDiskTypeString(), fmt->GetDiskSubTypeString(), VD->GetMissingCount(), VD->GetCRCBadCount());
 					//VD->ExportADF("debug.adf");
 				}
 			}
