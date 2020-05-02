@@ -203,8 +203,8 @@ bool FormatDiskC64_1541::Analyze()
 	}
 
 	// dir block
-	u8 dir_trk = sys->dir0_track-1;
-	u8 dir_sect = sys->dir0_sect;
+	u8 dir_trk = 17;//sys->dir0_track-1;
+	u8 dir_sect = 1;//sys->dir0_sect;
 
 	clog(1, "#############################################################\n");
 
