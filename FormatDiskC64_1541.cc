@@ -211,11 +211,12 @@ bool FormatDiskC64_1541::Analyze()
 	// Listing
 	{
 		int fd=-1;
+		char *fnout=NULL;
 		if (Config.gen_listing)
 		{
-			char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.lst", Config.fn_out);
-			clog(1,"# Generating file listing '%s'.\n",fnbuf);
-			fd = open(fnbuf, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
+			gen_output_filename(&fnout, Config.fn_out, OT_LISTING, ".lst", OutputParams("c64", 0,0,0,0));
+			clog(1,"# Generating file listing '%s'.\n",fnout);
+			fd = open(fnout, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
 		}
 		if ((Config.gen_listing)&&(fd>=0))
 		{
@@ -265,30 +266,39 @@ bool FormatDiskC64_1541::Analyze()
 			dir_trk = dir->entries[0].next_track-1;
 			dir_sect = dir->entries[0].next_sect;
 		}
+		if ((Config.gen_listing)&&(fd>=0))
+		{
+			close(fd);
+			free(fnout);
+		}
 	}
 
 	// Output DiskMaps
 	{
 		if (Config.gen_maps)
 		{
-			char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.maps", Config.fn_out);
-			clog(1,"# Generating block/usage/healthmaps '%s'.\n",fnbuf);
+			char *fnout=NULL;
+			gen_output_filename(&fnout, Config.fn_out, OT_MAPS, ".maps", OutputParams("c64", 0,0,0,0));
+			clog(1,"# Generating block/usage/healthmaps '%s'.\n",fnout);
 			if (DMap)
 			{
-				DMap->OutputMaps(fnbuf);
+				DMap->OutputMaps(fnout);
 			}
+			free(fnout);
 		}
 	}
 
 	// Export
 	if (Config.gen_export)
 	{
-		char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.%s", Config.fn_out, "d64");
-		clog(1,"# Generating diskimage '%s'.\n",fnbuf);
+		char *fnout=NULL;
+		gen_output_filename(&fnout, Config.fn_out, OT_DISKIMAGE, ".d64", OutputParams("c64", 0,0,0,0));
+		clog(1,"# Generating diskimage '%s'.\n",fnout);
 		if (Disk)
 		{
-			Disk->ExportD64(fnbuf);
+			Disk->ExportD64(fnout);
 		}
+		free(fnout);
 	}
 
 	return true;

@@ -298,11 +298,12 @@ bool FormatDiskAmiga::Analyze()
 		int fd=-1;
 		clog(2,"# Loading rootblock @ %d.\n",rootblkidx);
 
+		char *fnout=NULL;
 		if (Config.gen_listing)
 		{
-			char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.lst", Config.fn_out);
-			clog(1,"# Generating file listing '%s'.\n",fnbuf);
-			fd = open(fnbuf, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
+			gen_output_filename(&fnout, Config.fn_out, OT_LISTING, ".lst", OutputParams("amiga", 0,0,0,0));
+			clog(1,"# Generating file listing '%s'.\n",fnout);
+			fd = open(fnout, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
 		}
 		if ((Config.gen_listing)&&(fd>=0))
 		{
@@ -315,6 +316,7 @@ bool FormatDiskAmiga::Analyze()
 		if ((Config.gen_listing)&&(fd>=0))
 		{
 			close(fd);
+			free(fnout);
 		}
 	}
 
@@ -356,12 +358,14 @@ bool FormatDiskAmiga::Analyze()
 	{
 		if (Config.gen_maps)
 		{
-			char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.maps", Config.fn_out);
-			clog(1,"# Generating block/usage/healthmaps '%s'.\n",fnbuf);
+			char *fnout=NULL;
+			gen_output_filename(&fnout, Config.fn_out, OT_MAPS, ".maps", OutputParams("amiga", 0,0,0,0));
+			clog(1,"# Generating block/usage/healthmaps '%s'.\n",fnout);
 			if (DMap)
 			{
-				DMap->OutputMaps(fnbuf);
+				DMap->OutputMaps(fnout);
 			}
+			free(fnout);
 		}
 	}
 
@@ -376,12 +380,14 @@ bool FormatDiskAmiga::Analyze()
 	// Export
 	if (Config.gen_export)
 	{
-		char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.adf", Config.fn_out);
-		clog(1,"# Generating diskimage '%s'.\n",fnbuf);
+		char *fnout=NULL;
+		gen_output_filename(&fnout, Config.fn_out, OT_DISKIMAGE, ".adf", OutputParams("amiga", 0,0,0,0));
+		clog(1,"# Generating diskimage '%s'.\n",fnout);
 		if (Disk)
 		{
-			Disk->ExportADF(fnbuf);
+			Disk->ExportADF(fnout);
 		}
+		free(fnout);
 	}
 	return true;
 }

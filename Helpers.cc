@@ -14,6 +14,8 @@
 #include <sys/stat.h>
 #include <stdarg.h>
 
+#include <string>
+
 u16 swap16(u16 v) { return ( ((((v)>>8)&0xff)<<0) | ((((v)>>0)&0xff)<<8) ); }
 
 u8 printablechar(u8 b) { return (b<0x20)?'.':((b>=0x80)?'.':b); }
@@ -91,13 +93,87 @@ void clog_init()
 {
 	if ((Config.gen_log)&&(strlen(Config.fn_out)>0))
 	{
-		char sbuf[65100];
-		sprintf(sbuf, "%s.log", Config.fn_out);
-	__clog_fd = open(sbuf, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
+		char *fnout=NULL;
+		gen_output_filename(&fnout, Config.fn_out, OT_LOG, ".log", OutputParams("unknown", 0,0,0,0));
+	__clog_fd = open(fnout, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
+		free(fnout);
 	}
 }
 
 void clog_exit()
 {
 	if (__clog_fd>=0) close(__clog_fd);
+}
+
+void gen_output_filename(char **out, char const *fmt, OutputTypes type, char const *ext, OutputParams const &params)
+{
+	char numbuf[64];
+	std::string tmp(fmt);
+	// @i : input basename
+	std::string basefin(Config.fn_in);
+	basefin = basefin.substr(basefin.find_last_of('/')+1);
+	basefin = basefin.substr(0, basefin.length()-4);
+	while (tmp.find("@i")!=std::string::npos) { tmp.replace(tmp.find("@i"), 2, basefin); }
+	// @t : output type (listing,maps,diskimage,...)
+	char const *otname="_";
+	switch (type)
+	{
+		case OT_DISKIMAGE: otname="disk"; break;
+		case OT_FLUXVIZ: otname="fluxviz"; break;
+		case OT_LISTING: otname="listing"; break;
+		case OT_MAPS: otname="maps"; break;
+		case OT_LOG: otname="log"; break;
+	}
+	while (tmp.find("@t")!=std::string::npos) { tmp.replace(tmp.find("@t"), 2, otname); }
+	// @p : platform
+	while (tmp.find("@p")!=std::string::npos) { tmp.replace(tmp.find("@p"), 2, params.platform); }
+	// @q : quality level
+	sprintf(numbuf, "%03d", params.quality);
+	while (tmp.find("@q")!=std::string::npos) { tmp.replace(tmp.find("@q"), 2, numbuf); }
+
+	// append t/h/r
+	if (type==OT_FLUXVIZ)
+	{
+		sprintf(numbuf, ".T%03d", params.track);
+		tmp+=numbuf;
+		sprintf(numbuf, ".H%01d", params.head);
+		tmp+=numbuf;
+		sprintf(numbuf, ".R%02d", params.rev);
+		tmp+=numbuf;
+	}
+
+	tmp+=ext;
+
+	rec_mkdir(tmp.c_str());
+
+	*out = strdup(tmp.c_str());
+}
+
+void _rec_mkdir(char *fn)
+{
+	char *cur=strdup(fn);
+	fn[strlen(fn)-1]=0;
+	char *s=strrchr(fn,'/');
+	if (s)
+	{
+		*(s+1)=0;
+		_rec_mkdir(fn);
+	}
+	if (cur[strlen(cur)-1]=='/')
+	{
+		struct stat sb;
+		if (lstat(cur, &sb)<0)
+		{
+			clog(2,"# making dir '%s'\n", cur);
+			mkdir(cur, S_IRWXU);
+		}
+	}
+	free(cur);
+}
+
+void rec_mkdir(char const *fn)
+{
+	char *tmp = strdup(fn);
+	_rec_mkdir(tmp);
+	free(tmp);
 }

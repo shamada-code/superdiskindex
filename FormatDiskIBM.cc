@@ -360,12 +360,13 @@ bool FormatDiskIBM::Analyze()
 	// Listing
 	{
 		int fd=-1;
+		char *fnout=NULL;
 		if (Config.gen_listing)
 		{
-			char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.lst", Config.fn_out);
-			clog(1,"# Generating file listing '%s'.\n",fnbuf);
+			gen_output_filename(&fnout, Config.fn_out, OT_LISTING, ".lst", OutputParams(DiskType==DT_ATARIST?"atari-st":"pc", 0,0,0,0));
+			clog(1,"# Generating file listing '%s'.\n",fnout);
 
-			fd = open(fnbuf, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
+			fd = open(fnout, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
 		}
 
 		int rootblk = boot0->bpb.reserved_sectors+boot0->bpb.fat_count*boot0->bpb.sectors_per_fat;
@@ -382,6 +383,7 @@ bool FormatDiskIBM::Analyze()
 		if ((Config.gen_listing)&&(fd>=0))
 		{
 			close(fd);
+			free(fnout);
 		}
 		clog(1, "# Found %d bad/missing sectors in files/directories.\n", bad_sectors_in_used_blocks);
 		clog(1, "# Found %d bad/missing sectors in unused space.\n", (Disk->GetMissingCount()+Disk->GetCRCBadCount())-bad_sectors_in_used_blocks);
@@ -391,24 +393,28 @@ bool FormatDiskIBM::Analyze()
 	{
 		if (Config.gen_maps)
 		{
-			char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.maps", Config.fn_out);
-			clog(1,"# Generating block/usage/healthmaps '%s'.\n",fnbuf);
+			char *fnout=NULL;
+			gen_output_filename(&fnout, Config.fn_out, OT_MAPS, ".maps", OutputParams(DiskType==DT_ATARIST?"atari-st":"pc", 0,0,0,0));
+			clog(1,"# Generating block/usage/healthmaps '%s'.\n",fnout);
 			if (DMap)
 			{
-				DMap->OutputMaps(fnbuf);
+				DMap->OutputMaps(fnout);
 			}
+			free(fnout);
 		}
 	}
 
 	// Export
 	if (Config.gen_export)
 	{
-		char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.%s", Config.fn_out, DiskType==DT_ATARIST?"st":"img");
-		clog(1,"# Generating diskimage '%s'.\n",fnbuf);
+		char *fnout=NULL;
+		gen_output_filename(&fnout, Config.fn_out, OT_DISKIMAGE, DiskType==DT_ATARIST?".st":".img", OutputParams(DiskType==DT_ATARIST?"atari-st":"pc", 0,0,0,0));
+		clog(1,"# Generating diskimage '%s'.\n",fnout);
 		if (Disk)
 		{
-			Disk->ExportIMG(fnbuf);
+			Disk->ExportIMG(fnout);
 		}
+		free(fnout);
 	}
 
 	return true;

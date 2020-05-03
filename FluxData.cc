@@ -226,9 +226,12 @@ void FluxData::ScanTrack(int track, int rev, BitStream *bits, int pass, bool gcr
 
 	if ((Config.gen_fluxviz)&&(pass==0))
 	{
-		char fnbuf[65100]; snprintf(fnbuf, sizeof(fnbuf), "%s.flux.h%1d.t%02d.tga", Config.fn_out, track%2, track/2);
-		clog(1,"# Generating flux visualization '%s'.\n",fnbuf);
-		tex->Save(fnbuf);
+		char *fnout=NULL;
+		gen_output_filename(&fnout, Config.fn_out, OT_FLUXVIZ, ".tga", OutputParams("unknown", track/2,track%2,rev,0));
+		clog(1,"# Generating flux visualization '%s'.\n",fnout);
+		tex->Save(fnout);
+		free(fnout);
+		if (tex) { delete(tex); tex=NULL; }
 	}
 }
 
