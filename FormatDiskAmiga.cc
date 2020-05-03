@@ -212,7 +212,7 @@ void FormatDiskAmiga::HandleBlock(Buffer *buffer, int currev)
 		//clog(2,"# Sector label + %08x\n", label2 );
 		//clog(2,"# Sector label + %08x\n", label3 );
 
-		if (disktrack>GetMaxExpectedCylinder()) continue; // only allow tracks in expected range
+		if (disktrack/2>GetMaxExpectedCylinder()) continue; // only allow tracks in expected range
 		if (disksect>GetMaxExpectedSector()) continue; // only allow sectors in expected range
 		if (disktype!=0xff) continue;
 
