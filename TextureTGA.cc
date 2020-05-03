@@ -67,6 +67,7 @@ TextureTGA::TextureTGA(u16 w, u16 h)
 	BM = new Buffer();
 	BM->Alloc(Width*Height*4);
 	BM->SetFill(Width*Height*4);
+	BM->Zero();
 }
 
 TextureTGA::~TextureTGA()
