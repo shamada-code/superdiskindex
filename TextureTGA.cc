@@ -96,13 +96,13 @@ void TextureTGA::Save(char const *fn)
 		{
 			if (palc>=255)
 			{
-				clog(0, "# TGA: palette overflow!\n");
-				return;
+				clog(2, "# TGA: palette overflow!\n");
+				//return;
 			}
 			pal[palc++] = p0[i];
 		}
 	}
-	clog(0, "# TGA: palette has %d entries.\n", palc);
+	clog(3, "# TGA: palette has %d entries.\n", palc);
 
 	// open file
 	int fd=open(fn, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
