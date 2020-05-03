@@ -18,13 +18,16 @@ ToDo
 * add custom formatting options for output basename
 * ~~add make install to makefile~~
 * add json output of disk state for machine-parsing
+* refactor to use new disklayout class
+* add console output for listing and maps
+* ~~add reasonable limits in formats (max tracks,heads,sectors to expect)~~
 
 WishList
 --------
 * add repair/salvage mode
-* add ibm 5.25" formats
+* ~~add ibm 5.25" formats~~
 * add amiga 3.5" HD format
-* add c64 5.25" format
+* ~~add c64 5.25" format~~
 * add c64 3.5" format
 * add apple formats
 * generate scp files from adf/img
