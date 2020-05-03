@@ -162,6 +162,8 @@ int main(int argc, char **argv)
 	if ((Config.format==FMT_ANY)||(Config.format==FMT_1581))
 		Formats[formatidx++] = new FormatDiskC64_1581();
 
+	bool found_matching_format=false;
+
 	for (int formatidx=0; formatidx<FormatCount; formatidx++)
 	{
 		VirtualDisk *VD=NULL;
@@ -221,11 +223,16 @@ int main(int argc, char **argv)
 				if (fmt->Analyze())
 				{
 					clog(0,"# '%s' looks like a valid %s, %s disk with %d missing and %d bad sectors.\n", Config.fn_in, fmt->GetDiskTypeString(), fmt->GetDiskSubTypeString(), VD->GetMissingCount(), VD->GetCRCBadCount());
+					found_matching_format=true;
 					//VD->ExportADF("debug.adf");
 				}
 			}
-		
 		}
+	}
+
+	if (!found_matching_format)
+	{
+		clog(0,"# '%s' is not readable or in an unknown format.\n", Config.fn_in);
 	}
 
 	flux->Close();
