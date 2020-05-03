@@ -113,6 +113,7 @@ void *VirtualDisk::GetSector(u8 c, u8 h, u8 s)
 
 void *VirtualDisk::GetSector(u16 blk)
 {
+	if (blk>=GetSectorCount()) return NULL;
 	if (FinalDisk==NULL)
 	{
 		clog(0, "ERR: VirtualDisk has not been merged yet. This is a code bug.\n");
@@ -123,21 +124,29 @@ void *VirtualDisk::GetSector(u16 blk)
 
 bool VirtualDisk::IsSectorMissing(u16 blk)
 {
+	if (blk>=GetSectorCount()) return true;
 	return Disk.Cyls[blk2cyl(blk)].Heads[blk2head(blk)].Sectors[blk2sect(blk)].Merged.used==false;
 }
 bool VirtualDisk::IsSectorMissing(u16 c, u16 h, u16 s)
 {
+	if (c>=Cyls) return true;
+	if (h>=Heads) return true;
+	if (s>=Sects) return true;
 	return Disk.Cyls[c].Heads[h].Sectors[s].Merged.used==false;
 }
 
 bool VirtualDisk::IsSectorCRCBad(u16 blk)
 {
+	if (blk>=GetSectorCount()) return true;
 	return (
 		(Disk.Cyls[blk2cyl(blk)].Heads[blk2head(blk)].Sectors[blk2sect(blk)].Merged.crc1ok==false) ||
 		(Disk.Cyls[blk2cyl(blk)].Heads[blk2head(blk)].Sectors[blk2sect(blk)].Merged.crc2ok==false) );
 }
 bool VirtualDisk::IsSectorCRCBad(u16 c, u16 h, u16 s)
 {
+	if (c>=Cyls) return true;
+	if (h>=Heads) return true;
+	if (s>=Sects) return true;
 	return (
 		(Disk.Cyls[c].Heads[h].Sectors[s].Merged.crc1ok==false) ||
 		(Disk.Cyls[c].Heads[h].Sectors[s].Merged.crc2ok==false) );

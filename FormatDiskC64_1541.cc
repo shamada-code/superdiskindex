@@ -227,6 +227,7 @@ bool FormatDiskC64_1541::Analyze()
 		{
 			DMap->SetBitsSector(DLayout->CHStoBLK(dir_trk,0,dir_sect), DMF_DIRECTORY);
 			_1540_dirblk *dir = (_1540_dirblk *)(Disk->GetSector(dir_trk,0,dir_sect));
+			if (dir==NULL) break;
 			for (int i=0; i<8; i++)
 			{
 				if (dir->entries[i].type==0) continue;

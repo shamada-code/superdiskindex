@@ -427,6 +427,7 @@ void FormatDiskIBM::ParseDirectory(int fd, u32 block, u32 blkcount, char const *
 	for (u32 rs=0; rs<blkcount; rs++)
 	{
 		dir_entry *rootdir = (dir_entry *)(Disk->GetSector(block+rs));
+		if (rootdir==NULL) continue;
 		for (int i=0; i<entries_per_sect; i++)
 		{
 			if (rootdir[i].attrs==0xf)

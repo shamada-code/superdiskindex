@@ -60,6 +60,7 @@ void DiskMap::ClearBitsCluster(u32 cluster, u32 flags)
 
 u32 DiskMap::GetSector(u32 sector, u32 mask)
 {
+	if (sector>=SectorCount) return 0;
 	return Sectors[sector]&mask;
 }
 

@@ -324,34 +324,39 @@ bool FormatDiskAmiga::Analyze()
 	{
 		u32 blkmapidx = swap(root->bm_pages[0]);
 		u32 *blkmap = (u32 *)Disk->GetSector(blkmapidx);
-		//clog(1, "BLOCKMAP:\n# %04d |   ", 0);
-		bool blkmapmatch=true;
-		for (u32 i=0; i<Disk->GetSectorCount()/32; i++)
+		if (blkmap==NULL)
 		{
-			u32 bmval = swap(blkmap[i+1]);
-			for (int j=0; j<32; j++)
+			clog(2,"# Blockmap @%04d is not accessible.\n", blkmapidx);
+		} else {
+			//clog(1, "BLOCKMAP:\n# %04d |   ", 0);
+			bool blkmapmatch=true;
+			for (u32 i=0; i<Disk->GetSectorCount()/32; i++)
 			{
-				//clog(1, "%c", bmval&(1<<j)?'.':'+');
-				//if ((i*32+j+2)%128==127) clog(1, "\n# %04d | ", (i+1)*32);
-				u32 sectidx = i*32+j+2;
-				if (sectidx<Disk->GetSectorCount())
+				u32 bmval = swap(blkmap[i+1]);
+				for (int j=0; j<32; j++)
 				{
-					u8 sect_free = ((bmval&(1<<j))>0);
-					DMap->SetBitsSector(sectidx, sect_free?0:DMF_BLOCK_USED);
-					if ( (sect_free) && (DMap->GetSector(sectidx, DMF_CONTENT_MASK)>0) )
+					//clog(1, "%c", bmval&(1<<j)?'.':'+');
+					//if ((i*32+j+2)%128==127) clog(1, "\n# %04d | ", (i+1)*32);
+					u32 sectidx = i*32+j+2;
+					if (sectidx<Disk->GetSectorCount())
 					{
-						clog(1,"# WARNING: BlockMap mismatch - Sector %d is marked free, but belongs to a file/directory!\n", sectidx);
-						blkmapmatch=false;
-					}
-					if ( (!sect_free) && (DMap->GetSector(sectidx, DMF_CONTENT_MASK)==0) )
-					{
-						clog(1,"# WARNING: BlockMap mismatch - Sector %d is marked used, but doesn't belong to a file/directory!\n", sectidx);
-						blkmapmatch=false;
+						u8 sect_free = ((bmval&(1<<j))>0);
+						DMap->SetBitsSector(sectidx, sect_free?0:DMF_BLOCK_USED);
+						if ( (sect_free) && (DMap->GetSector(sectidx, DMF_CONTENT_MASK)>0) )
+						{
+							clog(1,"# WARNING: BlockMap mismatch - Sector %d is marked free, but belongs to a file/directory!\n", sectidx);
+							blkmapmatch=false;
+						}
+						if ( (!sect_free) && (DMap->GetSector(sectidx, DMF_CONTENT_MASK)==0) )
+						{
+							clog(1,"# WARNING: BlockMap mismatch - Sector %d is marked used, but doesn't belong to a file/directory!\n", sectidx);
+							blkmapmatch=false;
+						}
 					}
 				}
 			}
+			if (blkmapmatch) clog(1, "# Blockmap matches scanned files/directories on disk.\n");
 		}
-		if (blkmapmatch) clog(1, "# Blockmap matches scanned files/directories on disk.\n");
 	}
 
 	// Output DiskMaps
@@ -491,6 +496,10 @@ char const *FormatDiskAmiga::GetDiskSubTypeString()
 void FormatDiskAmiga::ScanFile(u32 block)
 {
 	SectorFileHead *base = (SectorFileHead *)Disk->GetSector(block);
+	if (base==NULL) {
+		clog(2, "block %04d is not accessible\n", block);
+		return;
+	}
 	char sbuf[30]; 
 	memset(sbuf, 0, sizeof(sbuf)); 
 	strncpy(sbuf, base->name, base->name_len);
