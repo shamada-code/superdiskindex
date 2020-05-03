@@ -89,6 +89,19 @@ void clog(int lvl, char const *fmt, ...)
 	}
 }
 
+void clogv(int lvl, char const *fmt, va_list args)
+{
+	va_list args2;
+	va_copy(args2, args);
+	if ((Config.gen_log)&&(__clog_fd>=0)&&(2>=lvl))
+	{
+		vdprintf(__clog_fd, fmt, args);
+	}
+	if (Config.verbose>=lvl) {
+		vprintf(fmt, args2);
+	}
+}
+
 void clog_init()
 {
 	if ((Config.gen_log)&&(strlen(Config.fn_out)>0))
@@ -176,4 +189,21 @@ void rec_mkdir(char const *fn)
 	char *tmp = strdup(fn);
 	_rec_mkdir(tmp);
 	free(tmp);
+}
+
+void cdprintf(bool do_clog, bool do_file, int fd, char const *fmt, ...)
+{
+	va_list args;
+
+	if (do_file) {
+		va_start(args,fmt);
+		vdprintf(fd, fmt, args);
+		va_end(args);
+	}
+
+	if (do_clog) {
+		va_start(args,fmt);
+		clogv(0, fmt, args);
+		va_end(args);
+	}
 }

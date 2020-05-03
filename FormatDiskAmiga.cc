@@ -313,12 +313,12 @@ bool FormatDiskAmiga::Analyze()
 			clog(1,"# Generating file listing '%s'.\n",fnout);
 			fd = open(fnout, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
 		}
-		if ((Config.gen_listing)&&(fd>=0))
+		//if ((Config.gen_listing)&&(fd>=0))
 		{
-			dprintf(fd, "Volume: %s\n", sbuf);
-			dprintf(fd, "\n");
-			dprintf(fd, "%-60s Type    Size  Blk  UID  GID\n", "Filename");
-			dprintf(fd, "-----------------------------------------------------------------------------------------\n");
+			cdprintf(Config.show_listing, Config.gen_listing, fd, "Volume: %s\n", sbuf);
+			cdprintf(Config.show_listing, Config.gen_listing, fd, "\n");
+			cdprintf(Config.show_listing, Config.gen_listing, fd, "%-60s Type    Size  Blk  UID  GID\n", "Filename");
+			cdprintf(Config.show_listing, Config.gen_listing, fd, "-----------------------------------------------------------------------------------------\n");
 		}
 		ParseDirectory(fd, rootblkidx,"/");
 		if ((Config.gen_listing)&&(fd>=0))
@@ -369,11 +369,14 @@ bool FormatDiskAmiga::Analyze()
 
 	// Output DiskMaps
 	{
-		if (Config.gen_maps)
+		//if (Config.gen_maps)
 		{
 			char *fnout=NULL;
 			gen_output_filename(&fnout, Config.fn_out, OT_MAPS, ".maps", OutputParams("amiga", 0,0,0,0));
-			clog(1,"# Generating block/usage/healthmaps '%s'.\n",fnout);
+			if (Config.gen_maps)
+			{
+				clog(1,"# Generating block/usage/healthmaps '%s'.\n",fnout);
+			}
 			if (DMap)
 			{
 				DMap->OutputMaps(fnout);
@@ -451,9 +454,9 @@ void FormatDiskAmiga::ParseDirectory(int fd, u32 block, char const *prefix)
 				case 2: sectype='D'; DMap->SetBitsSector(blk, DMF_DIRECTORY); break;
 			}
 			//clog(1, "dmap setting blk %04d to %c\n", blk, sectype);
-			if ((Config.gen_listing)&&(fd>=0))
+			//if ((Config.gen_listing)&&(fd>=0))
 			{
-				dprintf(fd, "%-60s [%c] %8d %04d %4d %4d\n", sbuf2,sectype,swap(filehead->size), blk, swap(filehead->uid), swap(filehead->gid));
+				cdprintf(Config.show_listing, Config.gen_listing, fd, "%-60s [%c] %8d %04d %4d %4d\n", sbuf2,sectype,swap(filehead->size), blk, swap(filehead->uid), swap(filehead->gid));
 			}
 			if (swap(filehead->sec_type)==2)
 			{

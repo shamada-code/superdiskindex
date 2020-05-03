@@ -230,10 +230,11 @@ bool FormatDiskC64_1541::Analyze()
 			clog(1,"# Generating file listing '%s'.\n",fnout);
 			fd = open(fnout, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
 		}
-		if ((Config.gen_listing)&&(fd>=0))
+		//if ((Config.gen_listing)&&(fd>=0))
 		{
+			memset(sbuf, 0, sizeof(sbuf));
 			CBM::petscii2ascii(sbuf, sys->label, 18);
-			dprintf(fd, "0 \"%-16s\" %c%c %c%c\n", sbuf, sys->id1, sys->id2, sys->dosversion, sys->dosformat);
+			cdprintf(Config.show_listing, Config.gen_listing, fd, "0 \"%-16s\" %c%c %c%c\n", sbuf, sys->id1, sys->id2, sys->dosversion, sys->dosformat);
 		}
 		while ((dir_trk!=0)&&(dir_trk!=0xff))
 		{
@@ -252,7 +253,7 @@ bool FormatDiskC64_1541::Analyze()
 					fstate = ScanFile(dir->entries[i].data_track-1, dir->entries[i].data_sect, dir->entries[i].size_in_blocks);
 				}
 
-				if ((Config.gen_listing)&&(fd>=0))
+				//if ((Config.gen_listing)&&(fd>=0))
 				{
 					CBM::petscii2ascii(sbuf, dir->entries[i].filename, 16);
 					char const *etype="???";
@@ -273,7 +274,7 @@ bool FormatDiskC64_1541::Analyze()
 						case -3: fstatestr = "<BADPTR>"; break;
 						case -4: fstatestr = "<BADCRC>"; break;
 					}
-					dprintf(fd, "%-4d \"%-16s\" %s   %s\n", dir->entries[i].size_in_blocks, sbuf, etype, fstatestr);
+					cdprintf(Config.show_listing, Config.gen_listing, fd, "%-4d \"%-16s\" %s   %s\n", dir->entries[i].size_in_blocks, sbuf, etype, fstatestr);
 				}
 			}
 			dir_trk = dir->entries[0].next_track-1;
@@ -288,11 +289,14 @@ bool FormatDiskC64_1541::Analyze()
 
 	// Output DiskMaps
 	{
-		if (Config.gen_maps)
+		//if (Config.gen_maps)
 		{
 			char *fnout=NULL;
 			gen_output_filename(&fnout, Config.fn_out, OT_MAPS, ".maps", OutputParams("c64", 0,0,0,0));
-			clog(1,"# Generating block/usage/healthmaps '%s'.\n",fnout);
+			if (Config.gen_maps)
+			{
+				clog(1,"# Generating block/usage/healthmaps '%s'.\n",fnout);
+			}
 			if (DMap)
 			{
 				DMap->OutputMaps(fnout);

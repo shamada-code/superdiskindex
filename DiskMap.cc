@@ -66,26 +66,32 @@ u32 DiskMap::GetSector(u32 sector, u32 mask)
 
 void DiskMap::OutputMaps(char const *fn)
 {
+	int fd=-1;
 	if (Config.gen_maps)
 	{
-		int fd = open(fn, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
-		DPrintBlockMap(fd);
-		DPrintFSMap(fd);
-		DPrintHealthMap(fd);
+		fd = open(fn, O_WRONLY|O_CREAT|O_TRUNC, DEFFILEMODE);
+	}
+
+	DPrintBlockMap(fd);
+	DPrintFSMap(fd);
+	DPrintHealthMap(fd);
+
+	if (Config.gen_maps)
+	{
 		close(fd);
 	}
 }
 
 void DiskMap::DPrintFSMap(int fd)
 {
-	dprintf(fd, "#################################################################################\n");
-	dprintf(fd, "### FileSystemMap:\n");
+	cdprintf(Config.show_maps, Config.gen_maps, fd, "#################################################################################\n");
+	cdprintf(Config.show_maps, Config.gen_maps, fd, "### FileSystemMap:\n");
 	u16 outputwidth=128;
 	u32 lines=SectorCount/outputwidth;
 	if (lines*outputwidth<SectorCount) lines++;
 	for (u32 i=0; i<lines; i++)
 	{
-		dprintf(fd, "# %04d | ", i*outputwidth);
+		cdprintf(Config.show_maps, Config.gen_maps, fd, "# %04d | ", i*outputwidth);
 		for (u32 j=0; (j<outputwidth)&&(i*outputwidth+j<SectorCount); j++)
 		{
 			char stype = '?';
@@ -99,23 +105,23 @@ void DiskMap::DPrintFSMap(int fd)
 				case DMF_DATA: stype='+'; break;
 				case 0: stype='.'; break;
 			}
-			dprintf(fd, "%c",stype);
+			cdprintf(Config.show_maps, Config.gen_maps, fd, "%c",stype);
 		}
-		dprintf(fd, "\n");
+		cdprintf(Config.show_maps, Config.gen_maps, fd, "\n");
 	}
-	dprintf(fd, "# Legend: (.) Empty (B) Boot (R) Root (M) Blockmap/FAT (D) Directory (F) FileHeader (+) Data\n");
+	cdprintf(Config.show_maps, Config.gen_maps, fd, "# Legend: (.) Empty (B) Boot (R) Root (M) Blockmap/FAT (D) Directory (F) FileHeader (+) Data\n");
 }
 
 void DiskMap::DPrintBlockMap(int fd)
 {
-	dprintf(fd, "#################################################################################\n");
-	dprintf(fd, "### BlockMap:\n");
+	cdprintf(Config.show_maps, Config.gen_maps, fd, "#################################################################################\n");
+	cdprintf(Config.show_maps, Config.gen_maps, fd, "### BlockMap:\n");
 	u16 outputwidth=128;
 	u32 lines=SectorCount/outputwidth;
 	if (lines*outputwidth<SectorCount) lines++;
 	for (u32 i=0; i<lines; i++)
 	{
-		dprintf(fd, "# %04d | ", i*outputwidth);
+		cdprintf(Config.show_maps, Config.gen_maps, fd, "# %04d | ", i*outputwidth);
 		for (u32 j=0; (j<outputwidth)&&(i*outputwidth+j<SectorCount); j++)
 		{
 			char stype = '?';
@@ -125,23 +131,23 @@ void DiskMap::DPrintBlockMap(int fd)
 				case DMF_BLOCK_USED: stype='+'; break;
 				default: stype='?'; break;
 			}
-			dprintf(fd, "%c",stype);
+			cdprintf(Config.show_maps, Config.gen_maps, fd, "%c",stype);
 		}
-		dprintf(fd, "\n");
+		cdprintf(Config.show_maps, Config.gen_maps, fd, "\n");
 	}
-	dprintf(fd, "# Legend: (.) Unused (+) Used\n");
+	cdprintf(Config.show_maps, Config.gen_maps, fd, "# Legend: (.) Unused (+) Used\n");
 }
 
 void DiskMap::DPrintHealthMap(int fd)
 {
-	dprintf(fd, "#################################################################################\n");
-	dprintf(fd, "### HealthMap:\n");
+	cdprintf(Config.show_maps, Config.gen_maps, fd, "#################################################################################\n");
+	cdprintf(Config.show_maps, Config.gen_maps, fd, "### HealthMap:\n");
 	u16 outputwidth=128;
 	u32 lines=SectorCount/outputwidth;
 	if (lines*outputwidth<SectorCount) lines++;
 	for (u32 i=0; i<lines; i++)
 	{
-		dprintf(fd, "# %04d | ", i*outputwidth);
+		cdprintf(Config.show_maps, Config.gen_maps, fd, "# %04d | ", i*outputwidth);
 		for (u32 j=0; (j<outputwidth)&&(i*outputwidth+j<SectorCount); j++)
 		{
 			char stype = '?';
@@ -151,9 +157,9 @@ void DiskMap::DPrintHealthMap(int fd)
 			else if ((sstate&DMF_CRC_LOWLEVEL_BAD)>0) stype='D';
 			else if ((sstate&DMF_CRC_HIGHLEVEL_BAD)>0) stype='C';
 			else stype='.';
-			dprintf(fd, "%c",stype);
+			cdprintf(Config.show_maps, Config.gen_maps, fd, "%c",stype);
 		}
-		dprintf(fd, "\n");
+		cdprintf(Config.show_maps, Config.gen_maps, fd, "\n");
 	}
-	dprintf(fd, "# Legend: (.) Ok (M) Missing (D) Defect/Lowlevel crc bad (C) Corrupted (filesys crc bad)\n");
+	cdprintf(Config.show_maps, Config.gen_maps, fd, "# Legend: (.) Ok (M) Missing (D) Defect/Lowlevel crc bad (C) Corrupted (filesys crc bad)\n");
 }

@@ -384,12 +384,12 @@ bool FormatDiskIBM::Analyze()
 		int rootblk = boot0->bpb.reserved_sectors+boot0->bpb.fat_count*boot0->bpb.sectors_per_fat;
 		int root_sects = boot0->bpb.root_entries*sizeof(dir_entry)/boot0->bpb.byte_per_sect; 
 
-		if ((Config.gen_listing)&&(fd>=0))
+		//if ((Config.gen_listing)&&(fd>=0))
 		{
-			dprintf(fd, "Volume: %s\n", "N/A");
-			dprintf(fd, "\n");
-			dprintf(fd, "%-60s     Size  Flags\n", "Filename");
-			dprintf(fd, "-----------------------------------------------------------------------------------------\n");
+			cdprintf(Config.show_listing, Config.gen_listing, fd, "Volume: %s\n", "N/A");
+			cdprintf(Config.show_listing, Config.gen_listing, fd, "\n");
+			cdprintf(Config.show_listing, Config.gen_listing, fd, "%-60s     Size  Flags\n", "Filename");
+			cdprintf(Config.show_listing, Config.gen_listing, fd, "-----------------------------------------------------------------------------------------\n");
 		}
 		ParseDirectory(fd, rootblk, root_sects, "/", &bad_sectors_in_used_blocks);
 		if ((Config.gen_listing)&&(fd>=0))
@@ -403,11 +403,14 @@ bool FormatDiskIBM::Analyze()
 
 	// Output DiskMaps
 	{
-		if (Config.gen_maps)
+		//if (Config.gen_maps)
 		{
 			char *fnout=NULL;
 			gen_output_filename(&fnout, Config.fn_out, OT_MAPS, ".maps", OutputParams(DiskType==DT_ATARIST?"atari-st":"pc", 0,0,0,0));
-			clog(1,"# Generating block/usage/healthmaps '%s'.\n",fnout);
+			if (Config.gen_maps)
+			{
+				clog(1,"# Generating block/usage/healthmaps '%s'.\n",fnout);
+			}
 			if (DMap)
 			{
 				DMap->OutputMaps(fnout);
@@ -452,9 +455,9 @@ void FormatDiskIBM::ParseDirectory(int fd, u32 block, u32 blkcount, char const *
 					char sbuf0[8+1]; memcpy(sbuf0, rootdir[i].name, 8); sbuf0[8]=0; for (int si=7; si>=0; si--) if (sbuf0[si]==0x20) sbuf0[si]=0;
 					char sbuf1[3+1]; memcpy(sbuf1, rootdir[i].ext, 3); sbuf1[3]=0; for (int si=2; si>=0; si--) if (sbuf1[si]==0x20) sbuf1[si]=0;
 					char sbuf[4096]; sprintf(sbuf, "%s%s%s%s%s", prefix, sbuf0, sbuf1[0]!=0?".":"", sbuf1, rootdir[i].attrs==DEA_DIR?"/":"");
-					if ((Config.gen_listing)&&(fd>=0))
+					//if ((Config.gen_listing)&&(fd>=0))
 					{
-						dprintf(fd, "%-60s %8d  <%c%c%c%c%c%c> %s\n", 
+						cdprintf(Config.show_listing, Config.gen_listing, fd, "%-60s %8d  <%c%c%c%c%c%c> %s\n", 
 							sbuf,
 							rootdir[i].size, 
 							(rootdir[i].attrs&DEA_VOL)?'V':'.',

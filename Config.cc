@@ -17,10 +17,12 @@ config_t Config =
     -1, // track
     -1, // rev
     1, // verbose
-    false, // listing
+    false, // listing (gen)
+    false, // listing (show)
     false, // export
     false, // log
-    false, // maps
+    false, // maps (gen)
+    false, // maps (show)
     false, // json
     false, // fluxviz
     FMT_ANY, // format

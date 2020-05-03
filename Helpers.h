@@ -55,3 +55,5 @@ struct OutputParams
 void gen_output_filename(char **out, char const *fmt, OutputTypes type, char const *ext, OutputParams const &params);
 
 void rec_mkdir(char const *fn);
+
+void cdprintf(bool do_clog, bool do_file, int fd, char const *fmt, ...);

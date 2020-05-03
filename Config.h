@@ -17,9 +17,11 @@ struct config_t
 	int revolution;
 	int verbose;
 	int gen_listing;
+	int show_listing;
 	int gen_export;
 	int gen_log;
 	int gen_maps;
+	int show_maps;
 	int gen_json;
 	int gen_fluxviz;
 	int format;
