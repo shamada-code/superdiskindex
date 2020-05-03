@@ -283,27 +283,51 @@ u16 FluxData::DetectTimings(void *data, u32 size, bool gcr_mode)
 	}
 	if (1) // version 2 of sync detect
 	{
-		float fcur=0;
-		float candidate=0;
+		float fcur[4]={0};
+		float candidates[4]={0};
 		int ticks=0;
 		for (u32 b=0; b<size; b++)
 		{
+			int q = (4*b)/size;
 			//clog(3,"%04x\n", data[b]);
 			float val = (u16)swap(dw[b]); // words are endian flipped in scp file
-			if ( (val-fcur) > (fcur*0.2) )
+			if ( (val-fcur[q]) > (fcur[q]*0.1) )
 			{
 				ticks=0;
 			} else {
 				ticks++;
-				if (ticks>30)
+				if (ticks>40)
 				{
-					if ((candidate==0)||(fcur<candidate))
+					if ((candidates[q]==0)||(fcur[q]<candidates[q]))
 					{
-						candidate = fcur;
+						candidates[q] = fcur[q];
 					}
 				}
 			}
-			fcur = (fcur+val)*0.5f;
+			float f=0.0f;
+			fcur[q] = (fcur[q]*f)+(val*(1-f));
+		}
+		// find best best candidate from all quadrants
+		float c0 = minval(minval(candidates[0],candidates[1]),minval(candidates[2],candidates[3]));
+		float c1 = maxval(maxval(candidates[0],candidates[1]),maxval(candidates[2],candidates[3]));
+		float d00 = abs(candidates[0]-c0);
+		float d10 = abs(candidates[1]-c0);
+		float d20 = abs(candidates[2]-c0);
+		float d30 = abs(candidates[3]-c0);
+		float d01 = abs(candidates[0]-c1);
+		float d11 = abs(candidates[1]-c1);
+		float d21 = abs(candidates[2]-c1);
+		float d31 = abs(candidates[3]-c1);
+		float davg0 = (d00+d10+d20+d30)*0.25f;
+		float davg1 = (d01+d11+d21+d31)*0.25f;
+		float candidate = 0;
+		if (davg0<davg1)
+		{
+			// the frequency bands tend to the lower candidates. so use the lower bands as reference.
+			candidate = (candidates[0]+candidates[1]+candidates[2]+candidates[3]-c1)/3.0f;
+		} else {
+			// the frequency bands tend to the higher candidates. so use the higher bands as reference.
+			candidate = (candidates[0]+candidates[1]+candidates[2]+candidates[3]-c0)/3.0f;
 		}
 		if (gcr_mode) {
 			t1=(u16)candidate;
