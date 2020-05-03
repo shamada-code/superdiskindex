@@ -109,6 +109,9 @@ u32 FormatDiskC64_1541::GetSyncBlockLen(int n)
 	return 0;
 }
 
+u16 FormatDiskC64_1541::GetMaxExpectedCylinder() { return 42; }
+u16 FormatDiskC64_1541::GetMaxExpectedSector() { return 25; }
+
 void FormatDiskC64_1541::HandleBlock(Buffer *buffer, int currev)
 {
 	buffer->GCRDecode(2,6);
@@ -122,7 +125,11 @@ void FormatDiskC64_1541::HandleBlock(Buffer *buffer, int currev)
 		crc.Block(db+1, 5, false);
 
 		clog(2,"# Sector Header + %02d/%02d + crc %02x (%s)\n", db[3], db[2], db[1], crc.Check()?"OK":"BAD");
-		if (crc.Check())
+		if ( 
+			(crc.Check()) && 
+			(db[3]<=GetMaxExpectedCylinder()) && // only allow tracks in expected range
+			(db[2]<=GetMaxExpectedSector()) && // only allow sectors in expected range
+			1)
 		{
 			if (!LayoutLocked)
 			{

@@ -26,6 +26,8 @@ public:
 	virtual u32 GetSyncWord(int n)=0;
 	virtual u32 GetSyncBlockLen(int n)=0;
 	virtual bool UsesGCR()=0;
+	virtual u16 GetMaxExpectedCylinder()=0;
+	virtual u16 GetMaxExpectedSector()=0;
 
 	//virtual bool Detect();
 	virtual void HandleBlock(Buffer *buffer, int currev)=0;

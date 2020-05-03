@@ -134,6 +134,9 @@ u32 FormatDiskAmiga::GetSyncBlockLen(int /*n*/)
 	return 0x438;//0x1900*2;
 }
 
+u16 FormatDiskAmiga::GetMaxExpectedCylinder() { return 82; }
+u16 FormatDiskAmiga::GetMaxExpectedSector() { return 25; }
+
 ///////////////////////////////////////////////////////////
 
 // bool FormatDiskAmiga::Detect()
@@ -205,8 +208,9 @@ void FormatDiskAmiga::HandleBlock(Buffer *buffer, int currev)
 		//clog(2,"# Sector label + %08x\n", label2 );
 		//clog(2,"# Sector label + %08x\n", label3 );
 
+		if (disktrack>GetMaxExpectedCylinder()) continue; // only allow tracks in expected range
+		if (disksect>GetMaxExpectedSector()) continue; // only allow sectors in expected range
 		if (disktype!=0xff) continue;
-		if (disktrack>=164) continue; // either a very weird format or bad data
 
 		if (crc1ok)
 		{

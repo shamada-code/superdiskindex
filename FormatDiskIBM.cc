@@ -164,6 +164,9 @@ u32 FormatDiskIBM::GetSyncBlockLen(int n)
 	return 0;
 }
 
+u16 FormatDiskIBM::GetMaxExpectedCylinder() { return 82; }
+u16 FormatDiskIBM::GetMaxExpectedSector() { return 25; }
+
 ///////////////////////////////////////////////////////////
 
 // bool FormatDiskIBM::Detect()
@@ -193,7 +196,11 @@ void FormatDiskIBM::HandleBlock(Buffer *buffer, int currev)
 		crc.Block(db, 4, true);
 
 		clog(2,"# Sector Header + %02d/%01d/%02d + crc %04x (%s)\n", db[2], db[3], db[4], (db[6]<<8)|db[7], crc.Check()?"OK":"BAD");
-		if (crc.Check())
+		if ( 
+			(crc.Check()) && 
+			(db[2]<=GetMaxExpectedCylinder()) && // only allow tracks in expected range
+			(db[4]<=GetMaxExpectedSector()) && // only allow sectors in expected range
+			1)
 		{
 			if (!LayoutLocked)
 			{
