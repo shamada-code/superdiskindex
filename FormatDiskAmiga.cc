@@ -266,7 +266,7 @@ bool FormatDiskAmiga::Analyze()
 	if (swap(root->type)==0x2) clog(1,"# ANALYZE: root block type ok.\n");
 	else {
 		clog(1,"# ANALYZE: root block @ %d type FAILED ($%08x!=$%08x).\n", swap(boot0->rootblock), swap(root->type),0x2);
-		hexdump(root, 512);
+		//hexdump(root, 512);
 		return false;
 	}
 
