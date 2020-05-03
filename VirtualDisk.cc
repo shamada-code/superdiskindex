@@ -175,11 +175,24 @@ void VirtualDisk::MergeRevs()
 				for (int r=0; r<Revs; r++)
 				{
 					if ( 
-						(!ok) &&
+						//(!ok) &&
 						(Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].used) &&
 						(Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc1ok) &&
 						(Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc2ok) )
 					{
+						if (Disk.Cyls[c].Heads[h].Sectors[s].Merged.used)
+						{
+							int res = memcmp(FinalDisk->GetBuffer()+(((c*Heads+h)*Sects+s)*SectSize), Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].Data, SectSize);
+							if (res!=0)
+							{
+								clog(0, "# Warning: Found multiple valid, but differing sector copies for %d/%d/%d.\n", c,h,s);
+								if (Config.verbose>=3)
+								{
+									hexdump(FinalDisk->GetBuffer()+(((c*Heads+h)*Sects+s)*SectSize), SectSize);
+									hexdump(Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].Data, SectSize);
+								}
+							}
+						}
 						memcpy(FinalDisk->GetBuffer()+(((c*Heads+h)*Sects+s)*SectSize), Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].Data, SectSize);
 						Disk.Cyls[c].Heads[h].Sectors[s].Merged.used = Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].used;
 						Disk.Cyls[c].Heads[h].Sectors[s].Merged.crc1ok = Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc1ok;
