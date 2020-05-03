@@ -202,6 +202,7 @@ int main(int argc, char **argv)
 				BitStream *bits=NULL;
 				bits = new BitStream(fmt, 0);
 				bits->InitSyncWords();
+				fmt->PreTrackInit();
 				for (int r=r0; r<rn; r++)
 				{
 					bits->SetRev(r);

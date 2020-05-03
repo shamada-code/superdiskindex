@@ -112,6 +112,11 @@ u32 FormatDiskC64_1541::GetSyncBlockLen(int n)
 u16 FormatDiskC64_1541::GetMaxExpectedCylinder() { return 42; }
 u16 FormatDiskC64_1541::GetMaxExpectedSector() { return 25; }
 
+void FormatDiskC64_1541::PreTrackInit()
+{
+	cur_c=cur_h=cur_s=-1;
+}
+
 void FormatDiskC64_1541::HandleBlock(Buffer *buffer, int currev)
 {
 	buffer->GCRDecode(2,6);

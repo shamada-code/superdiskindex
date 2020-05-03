@@ -145,6 +145,10 @@ u16 FormatDiskAmiga::GetMaxExpectedSector() { return 25; }
 // 	return false;
 // }
 
+void FormatDiskAmiga::PreTrackInit()
+{
+}
+
 void FormatDiskAmiga::HandleBlock(Buffer *buffer, int currev)
 {
 	//printf("Handling Block with size %d ($%08x).\n", buffer->GetFill(), buffer->GetFill());

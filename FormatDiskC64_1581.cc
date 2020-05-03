@@ -32,6 +32,10 @@ u32 FormatDiskC64_1581::GetSyncBlockLen(int /*n*/)
 	return 0;
 }
 
+void FormatDiskC64_1581::PreTrackInit()
+{
+}
+
 u16 FormatDiskC64_1581::GetMaxExpectedCylinder() { return 82; }
 u16 FormatDiskC64_1581::GetMaxExpectedSector() { return 25; }
 

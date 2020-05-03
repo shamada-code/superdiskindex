@@ -183,6 +183,11 @@ u16 FormatDiskIBM::GetMaxExpectedSector() { return 25; }
 // 	return false;
 // }
 
+void FormatDiskIBM::PreTrackInit()
+{
+	cur_c=cur_h=cur_s=-1;
+}
+
 void FormatDiskIBM::HandleBlock(Buffer *buffer, int currev)
 {
 	//printf("Handling Block with size %d.\n", buffer->GetFill());

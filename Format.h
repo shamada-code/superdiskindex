@@ -30,6 +30,7 @@ public:
 	virtual u16 GetMaxExpectedSector()=0;
 
 	//virtual bool Detect();
+	virtual void PreTrackInit()=0;
 	virtual void HandleBlock(Buffer *buffer, int currev)=0;
 	virtual bool Analyze()=0;
 
