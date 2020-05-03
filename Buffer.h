@@ -38,6 +38,8 @@ public:
 
 	void Clear();
 
+	void Zero();
+
 	u8 *GetBuffer() { return Data; }
 	u64 GetSize() { return Size; }
 	u64 GetFill() { return Fill; }

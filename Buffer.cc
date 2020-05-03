@@ -36,6 +36,11 @@ void Buffer::SetFill(u64 fill)
 	Fill=fill;
 }
 
+void Buffer::Zero()
+{
+	memset(Data, 0, Fill);
+}
+
 void Buffer::Push8(u8 db)
 {
 	RequireSize(Fill+1);
