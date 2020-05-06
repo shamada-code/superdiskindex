@@ -173,7 +173,7 @@ bool FormatDiskC64_1541::Analyze()
 {
 	char sbuf[64];
 
-	if (Disk->GetLayoutCylinders()!=35) return false; // only standard c64 floppy format is supported for now.
+	if ((Disk->GetLayoutCylinders()<31)||(Disk->GetLayoutCylinders()>41)) return false; // only standard c64 floppy format is supported for now.
 	if (Disk->GetLayoutHeads()!=1) return false; // only standard c64 floppy format is supported for now.
 	if (Disk->GetLayoutSectors()!=21) return false; // only standard c64 floppy format is supported for now.
 
