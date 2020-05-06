@@ -174,6 +174,8 @@ int main(int argc, char **argv)
 		clog(1,"######################################################################\n");
 		clog(1,"##### Checking for '%s' Format \n", fmt->GetName());
 
+		u16 track_timing_cache[track_e] = {0};
+
 		for (int pass=0; pass<2; pass++)
 		{
 			//clog(1,"###################################\n");
@@ -210,7 +212,15 @@ int main(int argc, char **argv)
 				for (int r=r0; r<rn; r++)
 				{
 					bits->SetRev(r);
-					flux->ScanTrack(t,r, bits, pass, fmt->UsesGCR());
+
+					u16 t1 = 0;
+					if (pass==0) {
+						t1 = flux->DetectTimings(t,r,fmt->UsesGCR());
+						track_timing_cache[t] = t1;
+					} else {
+						t1 = track_timing_cache[t];
+					}
+					flux->ScanTrack(t,r, bits, pass, t1, fmt->UsesGCR());
 				}
 				delete(bits); bits=NULL;
 			}

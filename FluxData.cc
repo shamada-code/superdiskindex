@@ -108,7 +108,7 @@ int FluxData::GetRevolutions()
 	return head->num_revs;
 }
 
-void FluxData::ScanTrack(int track, int rev, BitStream *bits, int pass, bool gcr_mode)
+void FluxData::ScanTrack(int track, int rev, BitStream *bits, int pass, u16 base_timing, bool gcr_mode)
 {
 	/*
 	int r0=0;
@@ -142,10 +142,10 @@ void FluxData::ScanTrack(int track, int rev, BitStream *bits, int pass, bool gcr
 		tex=new TextureTGA(w,h);
 	}
 
-	// first detect timing
 	u32 c = th->revs[r].fluxcount;
 	void *data = (u8 *)th+th->revs[r].data_offset;
-	u16 t1 = DetectTimings(data, c, gcr_mode);
+
+	u16 t1 = base_timing;
 
 	if ((Config.gen_fluxviz)&&(pass==0))
 	{
@@ -235,8 +235,15 @@ void FluxData::ScanTrack(int track, int rev, BitStream *bits, int pass, bool gcr
 	}
 }
 
-u16 FluxData::DetectTimings(void *data, u32 size, bool gcr_mode)
+u16 FluxData::DetectTimings(int track, int rev, bool gcr_mode)
 {
+	int r = rev;
+	scp_header *head = (scp_header *)Data;
+	track_header *th = (track_header *)(Data+head->track_head_offset[track]);
+	u32 c = th->revs[r].fluxcount;
+	void *data = (u8 *)th+th->revs[r].data_offset;
+
+	u32 size = c;
 	u16 *dw = (u16 *)data;
 	int t1 = 0;
 
@@ -281,7 +288,7 @@ u16 FluxData::DetectTimings(void *data, u32 size, bool gcr_mode)
 		t1 = t8ms/4;
 		if (gcr_mode) t1 = t8ms/3;
 	}
-	if (1) // version 2 of sync detect
+	if (0) // version 2 of sync detect
 	{
 		float fcur[4]={0};
 		float candidates[4]={0};
@@ -345,5 +352,109 @@ u16 FluxData::DetectTimings(void *data, u32 size, bool gcr_mode)
 			clog(2,"# Bit Frequency: %d (%.1fus / %.1fkHz)\n", t1, (float)t1*25.0f*0.001f, 1000.0f/((float)t1*25.0f*0.001f));
 		}
 	}
+	if (1) // version 3 of sync detect
+	{
+		//u16 det_basefreq = 1;
+		float lower_limit = 50;
+		float upper_limit = 300;
+		float lower_score = CalcBandError(lower_limit, dw,size,gcr_mode);
+		float upper_score = CalcBandError(upper_limit, dw,size,gcr_mode);
+		float best_band = FindBestBand(dw,size,lower_limit, upper_limit, lower_score, upper_score, gcr_mode);
+		float best_score = CalcBandError(best_band, dw,size,gcr_mode);
+
+		float final_band = best_band;
+		float final_score = best_score;
+		float harmonics[] = {2.0f/3.0f, 3.0f/5.0f, 3.0f/4.0f, 1.0f/2.0f, 1.0f/3.0f};
+		for (unsigned int h=0; h<sizeof(harmonics)/sizeof(*harmonics); h++)
+		{
+			float h_score = CalcBandError(best_band*harmonics[h], dw,size,gcr_mode); // check harmonics
+			if (h_score<final_score) { final_band = best_band*harmonics[h]; final_score = h_score; }
+		}
+
+		/*
+		int const maxband=4;
+		int bandcount[maxband] = {0};
+		int bandwidth=20; // in 25ns units
+
+		for (u32 b=0; b<size; b++)
+		{
+			u16 val = swap(dw[b]); // words are endian flipped in scp file
+			printf("%d\n", val);
+			bandcount[minval(val/bandwidth, maxband-1)]++;
+		}
+		for (int band=0; band<maxband; band++) printf("E:band[%02d] = %d\n", band, bandcount[band]);
+		*/
+
+		if (gcr_mode) {
+			t1=(u16)final_band;
+			clog(2,"###_Timing_info_GCR_#############################\n");
+			clog(2,"# Short Seq: (..11....)  %d (%.1fus)\n", 1*t1, (float)t1*1*25.0f*0.001f);
+			clog(2,"# Med Seq:   (..101...)  %d (%.1fus)\n", 2*t1, (float)t1*2*25.0f*0.001f);
+			clog(2,"# Long Seq:  (..1001..)  %d (%.1fus)\n", 3*t1, (float)t1*3*25.0f*0.001f);
+			clog(2,"# Bit Frequency: %d (%.1fus / %.1fkHz)\n", t1, (float)t1*25.0f*0.001f, 1000.0f/((float)t1*25.0f*0.001f));
+		} else {
+			t1=(u16)(final_band*1.0f);
+			clog(2,"###_Timing_info_MFM_#############################\n");
+			clog(2,"# Short Seq: (..101....) %d (%.1fus)\n", 2*t1, (float)t1*2*25.0f*0.001f);
+			clog(2,"# Med Seq:   (..1001...) %d (%.1fus)\n", 3*t1, (float)t1*3*25.0f*0.001f);
+			clog(2,"# Long Seq:  (..10001..) %d (%.1fus)\n", 4*t1, (float)t1*4*25.0f*0.001f);
+			clog(2,"# Bit Frequency: %d (%.1fus / %.1fkHz)\n", t1, (float)t1*25.0f*0.001f, 1000.0f/((float)t1*25.0f*0.001f));
+		}
+
+	}
 	return t1;
+}
+
+float FluxData::CalcBandError(float band, u16 *dw, u32 size, bool gcr_mode)
+{
+	float basefreq = band;
+	float banderrscore = 0;
+
+	//u16 bandwidth_half = basefreq>>1;
+	//u32 underruns = 0;
+	//u32 overruns = 0;
+	u32 samplingprecision = 1;
+	u32 samplingrate[] = {64, 8, 1};
+	u32 samplecount=0;
+	float bandcfg[2][5] = {{1,2,3,4,5},{0,1,2,3,4}};
+	for (u32 b=0; b<size; b+=samplingrate[samplingprecision])
+	{
+		float val = swap(dw[b]); // words are endian flipped in scp file
+		float e0 = abs(val-basefreq*bandcfg[gcr_mode?1:0][0]);
+		float e1 = abs(val-basefreq*bandcfg[gcr_mode?1:0][1]);
+		float e2 = abs(val-basefreq*bandcfg[gcr_mode?1:0][2]);
+		float e3 = abs(val-basefreq*bandcfg[gcr_mode?1:0][3]);
+		float e4 = abs(val-basefreq*bandcfg[gcr_mode?1:0][4]);
+		float e_min_in_band = minval(minval(e1,e2),e3);
+		float errscore = e_min_in_band;
+		if (minval(e0,e4)<e_min_in_band)
+		{
+			errscore = e2*10; // penalty for out-of-band values
+		}
+		//printf("sc(%.0f[%.0f:%.0f:%.0f]%.0f) =%.2f= %.2f[%.2f:%.2f:%.2f]%.2f -> [%.2f] *%.2f*\n", basefreq*bandcfg[gcr_mode?1:0][0], basefreq*bandcfg[gcr_mode?1:0][1], basefreq*bandcfg[gcr_mode?1:0][2], basefreq*bandcfg[gcr_mode?1:0][3], basefreq*bandcfg[gcr_mode?1:0][4], val, e0, e1, e2, e3, e4, e_min_in_band, errscore);
+		banderrscore+=errscore;
+		samplecount++;
+	}
+	banderrscore=banderrscore/(float)samplecount;
+
+	//printf("bandscore(%d) = %.2f/%.2f %c\n", basefreq, banderrscore, bestbanderrscore, marker);
+	return banderrscore;
+}
+
+float FluxData::FindBestBand(u16 *dw, u32 size, float lowerlimit, float upperlimit, float lower_score, float upper_score, bool gcr_mode, int it)
+{
+	clog(2, "# BandScan: Checking range [%.0f:%.0f].\n", lowerlimit, upperlimit);
+	float center = lowerlimit+(upperlimit-lowerlimit)*0.5f;
+	if ((it>16)||(abs(upperlimit-lowerlimit)<1.0f)) {
+		// end of recursion
+		return center;
+	}
+	float center_score = CalcBandError(center, dw,size,gcr_mode);
+
+	if (lower_score<upper_score)
+	{
+		return FindBestBand(dw,size,lowerlimit,center,lower_score,center_score, gcr_mode, it+1);
+	} else {
+		return FindBestBand(dw,size,center,upperlimit,center_score,upper_score, gcr_mode, it+1);
+	}
 }
