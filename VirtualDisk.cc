@@ -187,7 +187,7 @@ void VirtualDisk::MergeRevs()
 							int res = memcmp(FinalDisk->GetBuffer()+(((c*Heads+h)*Sects+s)*SectSize), Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].Data, SectSize);
 							if (res!=0)
 							{
-								clog(0, "# Warning: Found multiple valid, but differing sector copies for %d/%d/%d.\n", c,h,s);
+								clog(1, "# Warning: Found multiple valid, but differing sector copies for %d/%d/%d.\n", c,h,s);
 								if (Config.verbose>=3)
 								{
 									hexdump(FinalDisk->GetBuffer()+(((c*Heads+h)*Sects+s)*SectSize), SectSize);
@@ -234,7 +234,11 @@ void VirtualDisk::MergeRevs()
 				}
 				if (!ok)
 				{
-					clog(2,"# MISSING: No usable copy of sector %02d/%02d/%02d found.\n", c,h,s);
+					if (Config.track<0)
+					{
+						// only log this, when we scan all tracks - output is bogus with track limits
+						clog(2,"# MISSING: No usable copy of sector %02d/%02d/%02d found.\n", c,h,s);
+					}
 					SectorsMissing++;
 				}
 			}
