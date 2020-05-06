@@ -92,6 +92,8 @@ void VirtualDisk::AddSector(u8 c, u8 h, u8 s, u8 r, void *p, u32 size, bool crc1
 	if (c>=Cyls) { clog(2, "# Sector %02d/%01d/%02d is outside of disk layout. skipping.\n",c,h,s); return; }
 	if (h>=Heads) { clog(2, "# Sector %02d/%01d/%02d is outside of disk layout. skipping.\n",c,h,s); return; }
 	if (s>=Sects) { clog(2, "# Sector %02d/%01d/%02d is outside of disk layout. skipping.\n",c,h,s); return; }
+	if ((Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc1ok)&&(!crc1ok)) { clog(2, "# Sector %02d/%01d/%02d already read in better quality. skipping.\n",c,h,s); return; }
+	if ((Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc2ok)&&(!crc2ok)) { clog(2, "# Sector %02d/%01d/%02d already read in better quality. skipping.\n",c,h,s); return; }
 	memcpy(Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].Data, p, minval(size,SectSize));
 	Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].used=true;
 	Disk.Cyls[c].Heads[h].Sectors[s].Revs[r].crc1ok=crc1ok;
