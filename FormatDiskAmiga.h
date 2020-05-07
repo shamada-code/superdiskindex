@@ -17,7 +17,7 @@
 class FormatDiskAmiga : public Format
 {
 public:
-	FormatDiskAmiga() {}
+	FormatDiskAmiga();
 	virtual ~FormatDiskAmiga() {}
 
 	virtual char const *GetName();
@@ -27,8 +27,10 @@ public:
 	virtual u32 GetSyncWord(int n);
 	virtual u32 GetSyncBlockLen(int n);
 	virtual bool UsesGCR() { return false; }
-	virtual u16 GetMaxExpectedCylinder();
-	virtual u16 GetMaxExpectedSector();
+	virtual u16 GetMaxExpectedCylinder() { return 81; }
+	virtual u16 GetMaxExpectedHead() { return 1; }
+	virtual u16 GetMaxExpectedSector() { return 24; }
+	virtual bool UsesVariableTrackLen() { return false; }
 
 	//virtual bool Detect();
 	virtual void PreTrackInit();

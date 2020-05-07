@@ -18,7 +18,7 @@
 class FormatDiskC64_1581 : public Format
 {
 public:
-	FormatDiskC64_1581() {}
+	FormatDiskC64_1581();
 	virtual ~FormatDiskC64_1581() {}
 
 	virtual char const *GetName();
@@ -28,8 +28,10 @@ public:
 	virtual u32 GetSyncWord(int n);
 	virtual u32 GetSyncBlockLen(int n);
 	virtual bool UsesGCR() { return false; }
-	virtual u16 GetMaxExpectedCylinder();
-	virtual u16 GetMaxExpectedSector();
+	virtual u16 GetMaxExpectedCylinder() { return 0; }
+	virtual u16 GetMaxExpectedHead() { return 0; }
+	virtual u16 GetMaxExpectedSector() { return 0; }
+	virtual bool UsesVariableTrackLen() { return false; }
 
 	//virtual bool Detect();
 	virtual void PreTrackInit();

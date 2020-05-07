@@ -19,6 +19,7 @@
 #include "Helpers.h"
 #include "JsonState.h"
 #include "G64.h"
+#include "DiskLayout.h"
 
 ///////////////////////////////////////////////////////////
 
@@ -191,7 +192,7 @@ int main(int argc, char **argv)
 			//clog(1,"# Pass %d\n", pass);
 			if (pass==1) 
 			{
-				if ((fmt->GetCyls()==1) && (fmt->GetHeads()==1) && (fmt->GetSects()==1))
+				if (fmt->GetLayout()->GetTotalSectors()==0)
 				{
 					// empty disk - we can skip this Pass.
 					clog(1,"# No data found.\n");
@@ -199,7 +200,7 @@ int main(int argc, char **argv)
 				}
 				if (VD!=NULL) { delete(VD); VD=NULL; }
 				VD = new VirtualDisk();
-				VD->SetLayout(fmt->GetCyls(), fmt->GetHeads(), fmt->GetSects(), flux->GetRevolutions(), fmt->GetSectSize());
+				VD->SetLayout(fmt->GetLayout()->GetCylinders(), fmt->GetLayout()->GetHeads(), fmt->GetLayout()->GetSectors(), flux->GetRevolutions(), fmt->GetSectSize());
 				fmt->SetVirtualDisk(VD);
 			}
 
@@ -253,12 +254,13 @@ int main(int argc, char **argv)
 			}
 			if (pass==0) 
 			{
-				clog(1,"# Disk geometry detected: C%02d/H%02d/S%02d\n", fmt->GetCyls(), fmt->GetHeads(), fmt->GetSects());
+				fmt->GetLayout()->LockLayout();
+				clog(1,"# Disk geometry detected: C%02d/H%02d/S%02d\n", fmt->GetLayout()->GetCylinders(), fmt->GetLayout()->GetHeads(), fmt->GetLayout()->GetSectors());
 			}
 			if (pass==1) 
 			{
 				clog(1,"\n");
-				VD->MergeRevs();
+				VD->MergeRevs(fmt);
 				if (fmt->Analyze())
 				{
 					clog(0,"# '%s' looks like a valid %s, %s disk with %d missing and %d bad sectors.\n", Config.fn_in, fmt->GetDiskTypeString(), fmt->GetDiskSubTypeString(), VD->GetMissingCount(), VD->GetCRCBadCount());

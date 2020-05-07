@@ -20,6 +20,7 @@
 #include "CRC.h"
 #include "DiskMap.h"
 #include "JsonState.h"
+#include "DiskLayout.h"
 
 ///////////////////////////////////////////////////////////
 
@@ -117,6 +118,11 @@ struct SectorFileHead
 
 ///////////////////////////////////////////////////////////
 
+FormatDiskAmiga::FormatDiskAmiga()
+{
+	InitLayout();
+}
+
 char const *FormatDiskAmiga::GetName() { return "Amiga"; }
 
 u8 FormatDiskAmiga::GetSyncWordCount()
@@ -133,9 +139,6 @@ u32 FormatDiskAmiga::GetSyncBlockLen(int /*n*/)
 {
 	return 0x438;//0x1900*2;
 }
-
-u16 FormatDiskAmiga::GetMaxExpectedCylinder() { return 82; }
-u16 FormatDiskAmiga::GetMaxExpectedSector() { return 25; }
 
 ///////////////////////////////////////////////////////////
 
@@ -218,9 +221,10 @@ void FormatDiskAmiga::HandleBlock(Buffer *buffer, int currev)
 
 		if (crc1ok)
 		{
-			LastCyl = maxval(LastCyl, disktrack>>1);
-			LastHead = 1; // we only support double sided amiga disks
-			LastSect = maxval(LastSect, disksect);
+			if (!DLayout->FoundSector(disktrack>>1, disktrack%2, disksect))
+			{
+				continue;
+			}
 		}
 
 		if (Config.verbose>=3) hexdump(sect_data.GetBuffer(), sect_data.GetFill());

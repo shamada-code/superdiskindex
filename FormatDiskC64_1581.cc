@@ -12,6 +12,11 @@
 
 ///////////////////////////////////////////////////////////
 
+FormatDiskC64_1581::FormatDiskC64_1581()
+{
+	InitLayout();
+}
+
 char const *FormatDiskC64_1581::GetName()
 {
 	return "C64/1581";
@@ -35,9 +40,6 @@ u32 FormatDiskC64_1581::GetSyncBlockLen(int /*n*/)
 void FormatDiskC64_1581::PreTrackInit()
 {
 }
-
-u16 FormatDiskC64_1581::GetMaxExpectedCylinder() { return 82; }
-u16 FormatDiskC64_1581::GetMaxExpectedSector() { return 25; }
 
 void FormatDiskC64_1581::HandleBlock(Buffer * /*buffer*/, int /*currev*/)
 {

@@ -15,12 +15,23 @@
 class DiskLayout
 {
 public:
-	DiskLayout() : Cyls(0), Heads(0), Sects(0), VariableTrackLen(false), TrackLengths(NULL) {}
+	DiskLayout() : 
+		Cyls(0), Heads(0), Sects(0), 
+		VariableTrackLen(false), TrackLengths(NULL), 
+		FmtMaxCyl(0), FmtMaxHead(0), FmtMaxSect(0), 
+		LayoutLocked(false) 
+		{}
 	virtual ~DiskLayout() { free(TrackLengths); }
 
-	void SetLayout(u16 cyls, u16 heads, u16 sects, bool variabletracklen);
+	// this should be renamed or removed
+	//void SetLayout(u16 cyls, u16 heads, u16 sects, bool variabletracklen);
+	
+	void Configure(class Format *format);
+	bool FoundSector(u16 c, u16 h, u16 s);
+	void LockLayout();
+	bool IsLayoutLocked();
 
-	u16 GetCyls();
+	u16 GetCylinders();
 	u16 GetHeads();
 	u16 GetSectors();
 
@@ -43,4 +54,9 @@ protected:
 	u16 Sects;
 	bool VariableTrackLen;
 	u16 *TrackLengths;
+
+	u16 FmtMaxCyl;
+	u16 FmtMaxHead;
+	u16 FmtMaxSect;
+	bool LayoutLocked;
 };

@@ -22,7 +22,7 @@ enum _FatType
 class FormatDiskIBM : public Format
 {
 public:
-	FormatDiskIBM() : cur_c(-1),cur_h(-1),cur_s(-1),LayoutLocked(false) {}
+	FormatDiskIBM();
 	virtual ~FormatDiskIBM() {}
 
 	virtual char const *GetName();
@@ -32,8 +32,10 @@ public:
 	virtual u32 GetSyncWord(int n);
 	virtual u32 GetSyncBlockLen(int n);
 	virtual bool UsesGCR() { return false; }
-	virtual u16 GetMaxExpectedCylinder();
-	virtual u16 GetMaxExpectedSector();
+	virtual u16 GetMaxExpectedCylinder() { return 81; }
+	virtual u16 GetMaxExpectedHead() { return 1; }
+	virtual u16 GetMaxExpectedSector() { return 24; }
+	virtual bool UsesVariableTrackLen() { return false; }
 
 	//virtual bool Detect();
 	virtual void PreTrackInit();
@@ -58,7 +60,7 @@ protected:
 	char const *FatTypeName(_FatType fattype);
 
 	int cur_c,cur_h,cur_s;
-	bool LayoutLocked;
+	//bool LayoutLocked;
 
 	class DiskMap *DMap;
 };

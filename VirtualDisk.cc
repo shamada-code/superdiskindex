@@ -14,6 +14,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "Buffer.h"
+#include "DiskLayout.h"
+#include "Format.h"
 
 ///////////////////////////////////////////////////////////
 
@@ -154,7 +156,7 @@ bool VirtualDisk::IsSectorCRCBad(u16 c, u16 h, u16 s)
 		(Disk.Cyls[c].Heads[h].Sectors[s].Merged.crc2ok==false) );
 }
 
-void VirtualDisk::MergeRevs()
+void VirtualDisk::MergeRevs(Format *fmt)
 {
 	clog(1, "# Merging sector copies.\n");
 
@@ -171,7 +173,7 @@ void VirtualDisk::MergeRevs()
 	{
 		for (int h=0; h<Heads; h++)
 		{
-			for (int s=0; s<Sects; s++)
+			for (int s=0; s<fmt->GetLayout()->GetTrackLen(c); s++)
 			{
 				bool ok=false;
 				for (int r=0; r<Revs; r++)
@@ -249,10 +251,11 @@ void VirtualDisk::MergeRevs()
 	{
 		clog(1,"# Final Disk has no data.\n");
 	} else {
-		clog(1,"# Final Disk has %6d sectors in total.\n", Cyls*Heads*Sects);
+		u32 total_sectors = fmt->GetLayout()->GetTotalSectors();
+		clog(1,"# Final Disk has %6d sectors in total.\n", total_sectors);
 		clog(1,"#                %6d are missing sectors.\n", SectorsMissing);
 		clog(1,"#                %6d are bad sectors.\n", SectorsCRCBad);
-		clog(1,"# That's %.1f%% of the disk damaged.\n", (float)(100*(SectorsCRCBad+SectorsMissing)/(float)(Cyls*Heads*Sects)));
+		clog(1,"# That's %.1f%% of the disk damaged.\n", (float)(100*(SectorsCRCBad+SectorsMissing)/(float)(total_sectors)));
 	}
 }
 

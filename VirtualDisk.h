@@ -66,7 +66,7 @@ public:
 	u32 GetMissingCount() { return SectorsMissing; }
 	u32 GetCRCBadCount() { return SectorsCRCBad; }
 
-	void MergeRevs();
+	void MergeRevs(class Format *fmt);
 
 	void ExportADF(char const *fn);
 	void ExportIMG(char const *fn);

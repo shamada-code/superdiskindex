@@ -63,15 +63,15 @@ struct _1540_dirblk
 
 FormatDiskC64_1541::FormatDiskC64_1541() : cur_c(-1),cur_h(-1),cur_s(-1),LayoutLocked(false) 
 { 
+	InitLayout();
 	SectSize=256; 
-	DLayout = new DiskLayout();
 	// set layout to expected 1541 format
-	DLayout->SetLayout(35,1,0,true);
-	int i=0;
-	while (i<17) { DLayout->SetTrackLen(i++, 21); }
-	while (i<24) { DLayout->SetTrackLen(i++, 19); }
-	while (i<30) { DLayout->SetTrackLen(i++, 18); }
-	while (i<35) { DLayout->SetTrackLen(i++, 17); }
+	//DLayout->SetLayout(35,1,0,true);
+	//int i=0;
+	//while (i<17) { DLayout->SetTrackLen(i++, 21); }
+	//while (i<24) { DLayout->SetTrackLen(i++, 19); }
+	//while (i<30) { DLayout->SetTrackLen(i++, 18); }
+	//while (i<35) { DLayout->SetTrackLen(i++, 17); }
 }
 
 FormatDiskC64_1541::~FormatDiskC64_1541() 
@@ -109,9 +109,6 @@ u32 FormatDiskC64_1541::GetSyncBlockLen(int n)
 	return 0;
 }
 
-u16 FormatDiskC64_1541::GetMaxExpectedCylinder() { return 42; }
-u16 FormatDiskC64_1541::GetMaxExpectedSector() { return 25; }
-
 void FormatDiskC64_1541::PreTrackInit()
 {
 	cur_c=cur_h=cur_s=-1;
@@ -121,35 +118,27 @@ void FormatDiskC64_1541::HandleBlock(Buffer *buffer, int currev)
 {
 	buffer->GCRDecode(2,6);
 	u8 *db = buffer->GetBuffer();
+
+	// Sector Header
 	if (*db==0x8)
 	{
-		//hexdump(db, 7);
-
 		CRC8_xor crc(0);
-		//crc.Feed(0xa1a1, true);
 		crc.Block(db+1, 5, false);
 
 		clog(2,"# Sector Header + %02d/%02d + crc %02x (%s)\n", db[3], db[2], db[1], crc.Check()?"OK":"BAD");
-		if ( 
-			(crc.Check()) && 
-			(db[3]<=GetMaxExpectedCylinder()) && // only allow tracks in expected range
-			(db[2]<=GetMaxExpectedSector()) && // only allow sectors in expected range
-			1)
-		{
-			if (!LayoutLocked)
+		if (crc.Check()) {
+			if (DLayout->FoundSector(db[3]-1,0,db[2]))
 			{
-				LastCyl=maxval(LastCyl,db[3]-1);  // Tracks on cbm are starting with "1"!
-				LastSect=maxval(LastSect,db[2]);
+				cur_c=db[3]-1;
+				cur_h=0;
+				cur_s=db[2];
 			}
-			cur_c=db[3]-1;
-			cur_h=0;
-			cur_s=db[2];
 		}
 	}	
+
+	// Sector Data
 	if (*db==0x7)
 	{
-		//hexdump(db, 256);
-
 		CRC8_xor crc(0);
 		crc.Block(db+1, 257, false);
 		
@@ -173,9 +162,9 @@ bool FormatDiskC64_1541::Analyze()
 {
 	char sbuf[64];
 
-	if ((Disk->GetLayoutCylinders()<31)||(Disk->GetLayoutCylinders()>41)) return false; // only standard c64 floppy format is supported for now.
-	if (Disk->GetLayoutHeads()!=1) return false; // only standard c64 floppy format is supported for now.
-	if (Disk->GetLayoutSectors()!=21) return false; // only standard c64 floppy format is supported for now.
+	if ((DLayout->GetCylinders()<31)||(DLayout->GetCylinders()>41)) return false; // only standard c64 floppy format is supported for now.
+	if (DLayout->GetHeads()!=1) return false; // only standard c64 floppy format is supported for now.
+	if (DLayout->GetSectors()!=21) return false; // only standard c64 floppy format is supported for now.
 
 	// boot block
 	_1540_sysblk *sys = (_1540_sysblk *)(Disk->GetSector(17,0,0));

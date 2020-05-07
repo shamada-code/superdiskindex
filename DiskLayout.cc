@@ -11,7 +11,9 @@
 #include "Types.h"
 #include "DiskLayout.h"
 #include "Helpers.h"
+#include "Format.h"
 
+/*
 void DiskLayout::SetLayout(u16 cyls, u16 heads, u16 sects, bool variabletracklen) 
 { 
 	Cyls=cyls; 
@@ -26,8 +28,57 @@ void DiskLayout::SetLayout(u16 cyls, u16 heads, u16 sects, bool variabletracklen
 		TrackLengths=NULL;
 	}
 }
+*/
 
-u16 DiskLayout::GetCyls() 
+void DiskLayout::Configure(Format *format)
+{
+	LayoutLocked=false;
+	FmtMaxCyl = format->GetMaxExpectedCylinder();
+	FmtMaxHead = format->GetMaxExpectedHead();
+	FmtMaxSect = format->GetMaxExpectedSector();
+	VariableTrackLen = format->UsesVariableTrackLen();
+
+	if (VariableTrackLen)
+	{
+		TrackLengths = (u16 *)realloc(TrackLengths, sizeof(*TrackLengths)*(FmtMaxCyl+1));
+	} else {
+		free(TrackLengths);
+		TrackLengths=NULL;
+	}
+}
+
+bool DiskLayout::FoundSector(u16 c, u16 h, u16 s)
+{
+	if (c>FmtMaxCyl) return false;
+	if (h>FmtMaxHead) return false;
+	if (s>FmtMaxSect) return false;
+
+	if (LayoutLocked) return true;
+
+	Cyls=maxval(Cyls,c+1);
+	Heads=maxval(Heads,h+1);
+	if (VariableTrackLen)
+	{
+		TrackLengths[c] = maxval(TrackLengths[c], s+1);
+		Sects=maxval(Sects,s+1);
+	} else {
+		Sects=maxval(Sects,s+1);
+	}
+
+	return true;
+}
+
+void DiskLayout::LockLayout()
+{
+	LayoutLocked=true;
+}
+
+bool DiskLayout::IsLayoutLocked()
+{
+	return LayoutLocked;
+}
+
+u16 DiskLayout::GetCylinders() 
 { 
 	return Cyls;
 }

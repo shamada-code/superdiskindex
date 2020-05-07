@@ -19,6 +19,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "DiskMap.h"
+#include "DiskLayout.h"
 
 ///////////////////////////////////////////////////////////
 
@@ -133,6 +134,11 @@ enum direntry_attr {
 
 ///////////////////////////////////////////////////////////
 
+FormatDiskIBM::FormatDiskIBM() : cur_c(-1),cur_h(-1),cur_s(-1)
+{
+	InitLayout();
+}
+
 char const *FormatDiskIBM::GetName() { return "IBM/PC/Atari"; }
 
 u8 FormatDiskIBM::GetSyncWordCount()
@@ -164,9 +170,6 @@ u32 FormatDiskIBM::GetSyncBlockLen(int n)
 	return 0;
 }
 
-u16 FormatDiskIBM::GetMaxExpectedCylinder() { return 82; }
-u16 FormatDiskIBM::GetMaxExpectedSector() { return 25; }
-
 ///////////////////////////////////////////////////////////
 
 // bool FormatDiskIBM::Detect()
@@ -193,7 +196,8 @@ void FormatDiskIBM::HandleBlock(Buffer *buffer, int currev)
 	//printf("Handling Block with size %d.\n", buffer->GetFill());
 	buffer->MFMDecode();
 	u8 *db = buffer->GetBuffer();
-	//hexdump(db, 64);
+
+	// Sector header
 	if ( (db[0]==0xa1) && (db[1]==0xfe) )
 	{
 		CRC16_ccitt crc(~0);
@@ -201,23 +205,17 @@ void FormatDiskIBM::HandleBlock(Buffer *buffer, int currev)
 		crc.Block(db, 4, true);
 
 		clog(2,"# Sector Header + %02d/%01d/%02d + crc %04x (%s)\n", db[2], db[3], db[4], (db[6]<<8)|db[7], crc.Check()?"OK":"BAD");
-		if ( 
-			(crc.Check()) && 
-			(db[2]<=GetMaxExpectedCylinder()) && // only allow tracks in expected range
-			(db[4]<=GetMaxExpectedSector()) && // only allow sectors in expected range
-			1)
-		{
-			if (!LayoutLocked)
+		if (crc.Check()) {
+			if (DLayout->FoundSector(db[2],db[3],db[4]-1))
 			{
-				LastCyl=maxval(LastCyl,db[2]);
-				LastHead=maxval(LastHead,db[3]);
-				LastSect=maxval(LastSect,db[4]-1); // Sectors on ibm are starting with "1"!
+				cur_c=db[2];
+				cur_h=db[3];
+				cur_s=db[4]-1;
 			}
-			cur_c=db[2];
-			cur_h=db[3];
-			cur_s=db[4]-1;
 		}
 	}
+
+	// Sector data
 	if ( (db[0]==0xa1) && (db[1]==0xfb) )
 	{
 		CRC16_ccitt crc(~0);
@@ -243,10 +241,12 @@ void FormatDiskIBM::HandleBlock(Buffer *buffer, int currev)
 					// sanity check boot block
 					if (boot0->bpb.byte_per_sect==512)
 					{
-						LastHead = boot0->bpb.head_count-1;
-						LastSect = boot0->bpb.sectors_per_track-1;
-						LastCyl = (boot0->bpb.sector_count/(boot0->bpb.head_count*boot0->bpb.sectors_per_track))-1;
-						LayoutLocked=true;
+						DLayout->FoundSector(
+							(boot0->bpb.sector_count/(boot0->bpb.head_count*boot0->bpb.sectors_per_track))-1,
+							boot0->bpb.head_count-1,
+							boot0->bpb.sectors_per_track-1
+							);
+						DLayout->LockLayout();
 					}
 				}
 			}

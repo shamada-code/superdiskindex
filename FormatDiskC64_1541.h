@@ -28,8 +28,10 @@ public:
 	virtual u32 GetSyncWord(int n);
 	virtual u32 GetSyncBlockLen(int n);
 	virtual bool UsesGCR() { return true; }
-	virtual u16 GetMaxExpectedCylinder();
-	virtual u16 GetMaxExpectedSector();
+	virtual u16 GetMaxExpectedCylinder() { return 41; }
+	virtual u16 GetMaxExpectedHead() { return 0; }
+	virtual u16 GetMaxExpectedSector() { return 24; }
+	virtual bool UsesVariableTrackLen() { return true; }
 
 	//virtual bool Detect();
 	virtual void PreTrackInit();
@@ -43,7 +45,6 @@ protected:
 	//void ParseDirectory(int fd, u32 block, char const *prefix);
 	//void ScanFile(u32 block);
 	class DiskMap *DMap;
-	class DiskLayout *DLayout;
 
 	int cur_c,cur_h,cur_s;
 	bool LayoutLocked;
