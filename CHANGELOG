@@ -1,0 +1,14 @@
+========================
+SuperDiskIndex Changelog
+========================
+
+* v0.04
+- added c64 (and siblings) 5.25" support (1541/1571/...)
+- improved timing detection (results in less missing/bad sectors)
+- add experimental g64 export (use with caution - might break things!)
+- new feature: show listing/maps on console with --show_listing and --show-maps
+- added new feature: reverse bitsteam to capture flippy disks (use --reverse)
+- added new feature: Flux Visualization (generate tga with graphical 
+  analysis of timings - use with care/can generate lots of files and is slow!)
+- general optimations
+- improved console output
