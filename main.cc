@@ -18,6 +18,7 @@
 #include <getopt.h>
 #include "Helpers.h"
 #include "JsonState.h"
+#include "G64.h"
 
 ///////////////////////////////////////////////////////////
 
@@ -51,6 +52,7 @@ void print_help()
 	printf("     --format-ibm          | Test only for ibm pc/atari format\n");
 	printf("     --format-1541         | Test only for c64 1541(5.25\") format\n");
 	printf("     --format-1581         | Test only for c64 1581(3.5\") format\n");
+	printf("     --experimental-g64    | export g64 image (only use with --format-1541!)\n");
 	printf("  -v                       | Increase verbosity (can be applied more than once)\n");
 	printf("  -q,--quiet               | Set verbosity to minimum level\n");
 	printf("\n");
@@ -110,6 +112,7 @@ int main(int argc, char **argv)
 		{"format-ibm", 0, &Config.format, FMT_IBM },
 		{"format-1541", 0, &Config.format, FMT_1541 },
 		{"format-1581", 0, &Config.format, FMT_1581 },
+		{"experimental-g64", 0, &Config.gen_g64, true },
 		{0,0,0,0}
 	};
 	int ret = 0;
@@ -166,6 +169,12 @@ int main(int argc, char **argv)
 
 	bool found_matching_format=false;
 
+	G64 *g64=NULL;
+	if (Config.gen_g64)
+	{
+		g64=new G64();
+	}
+
 	for (int formatidx=0; formatidx<FormatCount; formatidx++)
 	{
 		VirtualDisk *VD=NULL;
@@ -220,7 +229,25 @@ int main(int argc, char **argv)
 					} else {
 						t1 = track_timing_cache[t];
 					}
+					if (
+						(pass==0) &&
+						(t%2==0) && // only first head / top side
+						(r==1) && // only the second rev
+						(Config.gen_g64)
+					) { 
+						bits->EnableRawBitstream();
+						bits->ResetRawBitstream();
+					}
 					flux->ScanTrack(t,r, bits, pass, t1, fmt->UsesGCR());
+					if (
+						(pass==0) &&
+						(t%2==0) && // only first head / top side
+						(r==1) && // only the second rev
+						(Config.gen_g64)
+					) {
+						Buffer *rawtrack = bits->GetRawBuffer();
+						g64->AddTrack(t>>1, rawtrack);
+					}
 				}
 				delete(bits); bits=NULL;
 			}
@@ -245,6 +272,12 @@ int main(int argc, char **argv)
 	if (!found_matching_format)
 	{
 		clog(0,"# '%s' is not readable or in an unknown format.\n", Config.fn_in);
+	}
+
+	if (Config.gen_g64)
+	{
+		g64->WriteG64File();
+		delete(g64);
 	}
 
 	flux->Close();

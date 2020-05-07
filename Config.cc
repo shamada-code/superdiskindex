@@ -25,6 +25,7 @@ config_t Config =
     false, // maps (show)
     false, // json
     false, // fluxviz
+    false, // g64
     FMT_ANY, // format
     false  // reverse
 };

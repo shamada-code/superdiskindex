@@ -13,6 +13,7 @@ OBJS+=GCR.o
 OBJS+=CBM.o
 OBJS+=DiskLayout.o
 OBJS+=TextureTGA.o
+OBJS+=G64.o
 
 CXXFLAGS=-Wall
 

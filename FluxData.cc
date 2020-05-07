@@ -171,6 +171,7 @@ void FluxData::ScanTrack(int track, int rev, BitStream *bits, int pass, u16 base
 	}
 
 	u16 *times = (u16 *)data;
+	u32 bitcount = 0;
 	for (u32 b0=0; b0<c; b0++)
 	{
 		u32 b;
@@ -201,21 +202,25 @@ void FluxData::ScanTrack(int track, int rev, BitStream *bits, int pass, u16 base
 		{
 			case 1:
 				bits->Feed(1);
+				bitcount+=1;
 				break;
 			case 2:
 				bits->Feed(0);
 				bits->Feed(1);
+				bitcount+=2;
 				break;
 			case 3:
 				bits->Feed(0);
 				bits->Feed(0);
 				bits->Feed(1);
+				bitcount+=3;
 				break;
 			case 4:
 				bits->Feed(0);
 				bits->Feed(0);
 				bits->Feed(0);
 				bits->Feed(1);
+				bitcount+=4;
 				break;
 			default:
 				clog(1,"# ERR: Quantizer fail!\n");
@@ -223,6 +228,7 @@ void FluxData::ScanTrack(int track, int rev, BitStream *bits, int pass, u16 base
 		}
 	}
 	bits->Flush();
+	clog(2,"# Track %d (rev=%d) has %d bits / %d bytes total data (gap+sync+header+payload).\n", track, rev, bitcount, bitcount>>3);
 
 	if ((Config.gen_fluxviz)&&(pass==0))
 	{

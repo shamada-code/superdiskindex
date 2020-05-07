@@ -24,10 +24,14 @@ BitStream::BitStream(Format *fmt, u8 currev)
 	PayloadCounter=0;
 	Fmt=fmt;
 	CurRev=currev;
+	RawTrack=NULL;
+	RawTrackSR=0;
+	RawTrackC=0;
 }
 
 BitStream::~BitStream()
 {
+	delete(RawTrack);
 	delete(Data);
 }
 
@@ -60,6 +64,18 @@ void BitStream::Feed(u8 bit)
 {
 	Capture = (Capture<<1) | bit;
 	CaptureUsed++;
+
+	// raw track caching
+	if (RawTrack!=NULL)
+	{
+		RawTrackSR = (RawTrackSR<<1) | bit;
+		RawTrackC++;
+		if (RawTrackC>=8) {
+			RawTrack->Push8(RawTrackSR);
+			RawTrackSR=0;
+			RawTrackC=0;
+		}
+	}
 
 	if (SyncFlag==0)
 	{
@@ -111,4 +127,34 @@ void BitStream::Flush()
 	{
 		//Fmt->HandleBlock(Data, CurRev);
 	}
+}
+
+void BitStream::EnableRawBitstream()
+{
+	if (RawTrack==NULL) { RawTrack=new Buffer(); }
+}
+
+void BitStream::DisableRawBitstream()
+{
+	delete(RawTrack); 
+	RawTrack=NULL;
+}
+
+void BitStream::ResetRawBitstream()
+{
+	if (RawTrack==NULL) return;
+	RawTrack->Clear();
+	RawTrackC=0;
+	RawTrackSR=0;
+}
+
+Buffer *BitStream::GetRawBuffer()
+{
+	if (RawTrack==NULL) return NULL;
+	if (RawTrackC>0)
+	{
+		while (RawTrackC<8) { RawTrackSR = RawTrackSR<<1; RawTrackC++;}
+		RawTrack->Push8(RawTrackSR);
+	}
+	return RawTrack;
 }

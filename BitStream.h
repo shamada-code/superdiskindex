@@ -41,6 +41,11 @@ public:
 	bool IsSynced() { return SyncFlag==1; }
 	u8 GetActiveSyncDef() { return ActiveSyncDef; }
 
+	void EnableRawBitstream();
+	void DisableRawBitstream();
+	void ResetRawBitstream();
+	class Buffer *GetRawBuffer();
+
 protected:
 	void Store(u8 val);
 
@@ -55,4 +60,8 @@ protected:
 	int ActiveSyncDef;
 	u32 PayloadCounter;
 	u8 CurRev;
+
+	class Buffer *RawTrack;
+	u8 RawTrackSR;
+	u8 RawTrackC;
 };

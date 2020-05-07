@@ -24,6 +24,7 @@ struct config_t
 	int show_maps;
 	int gen_json;
 	int gen_fluxviz;
+	int gen_g64;
 	int format;
 	int reverse;
 };
